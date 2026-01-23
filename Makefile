@@ -2,22 +2,34 @@ SHELL := /usr/bin/bash
 .ONESHELL:
 .SHELLFLAGS := -euo pipefail -c
 
-ifneq ("$(wildcard .env)","")
-	include .env
-	export $(shell sed -n 's/^\([^#][A-Za-z0-9_]*\)=.*/\1/p' .env)
-endif
-
 GO ?= go
+BIN ?= gometrum
+CMD ?= ./cmd/main.go
+OUT ?= ./bin/$(BIN)
 
-.PHONY: help run build
+.PHONY: help run build clean
 
 help:
 	@echo "Targets:"
-	@echo "  make run"
-	@echo "  make build"
+	@echo "  make run -- [flags]        Run app (passes flags after --)"
+	@echo "  make build                 Build binary into ./bin/"
+	@echo "  make clean                 Remove ./bin/"
+	@echo ""
+	@echo "Examples:"
+	@echo "  make run -- --help"
+	@echo "  make run -- --config ./gometrum.yaml --once"
+	@echo "  make run -- --dry-run --log-level debug"
+	@echo "  make build && ./bin/$(BIN) --help"
 
 run:
-	$(GO) run ./cmd/main.go
+	$(GO) run $(CMD) $(filter-out $@,$(MAKECMDGOALS))
 
 build:
-	go build -o ./bin/app ./cmd/main.go
+	mkdir -p ./bin
+	$(GO) build -o $(OUT) $(CMD)
+
+clean:
+	rm -rf ./bin
+
+%:
+	@:
