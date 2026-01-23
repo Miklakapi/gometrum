@@ -1,9 +1,12 @@
 package main
 
 import (
-	"log"
+	"fmt"
+
+	"github.com/Miklakapi/gometrum/internal/cli"
 )
 
 func main() {
-	log.Println("Test")
+	flags := cli.ParseFlags()
+	fmt.Printf("%+v\n", flags)
 }
