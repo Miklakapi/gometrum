@@ -1,0 +1,8 @@
+gometrum
+*.exe
+uploads
+bin
+*.db
+*.log
+*.logs
+.env
