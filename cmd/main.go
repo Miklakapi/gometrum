@@ -1,18 +1,28 @@
 package main
 
 import (
+	"context"
 	"fmt"
 	"log"
+	"os"
+	"os/signal"
+	"syscall"
 
 	"github.com/Miklakapi/gometrum/internal/cli"
 	"github.com/Miklakapi/gometrum/internal/config"
+	"github.com/Miklakapi/gometrum/internal/logger"
 )
 
 func main() {
+	_, stop := signal.NotifyContext(context.Background(), os.Interrupt, syscall.SIGTERM)
+	defer stop()
+
 	flags, err := cli.ParseFlags()
 	if err != nil {
 		log.Fatalln(err)
 	}
+
+	logger.SetupLogger(flags.LogLevel)
 
 	switch {
 	case flags.GenerateConfig:
@@ -36,7 +46,4 @@ func main() {
 	}
 
 	// Handle dry run + one + normal run
-
-	fmt.Printf("%+v\n", flags)
-	fmt.Println(config.ExampleYAML)
 }
