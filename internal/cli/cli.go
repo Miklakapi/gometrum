@@ -3,13 +3,14 @@ package cli
 import "flag"
 
 type CLI struct {
-	ConfigPath  string
-	Once        bool
-	LogLevel    string
-	Quiet       bool
-	Validate    bool
-	DryRun      bool
-	PrintConfig bool
+	ConfigPath     string
+	Once           bool
+	LogLevel       string
+	Quiet          bool
+	Validate       bool
+	DryRun         bool
+	PrintConfig    bool
+	GenerateConfig bool
 }
 
 func ParseFlags() CLI {
@@ -30,6 +31,8 @@ func ParseFlags() CLI {
 	flag.BoolVar(&cfg.DryRun, "dry-run", false, "Collect metrics but do not publish (print output only)")
 
 	flag.BoolVar(&cfg.PrintConfig, "print-config", false, "Print final merged config and exit")
+
+	flag.BoolVar(&cfg.GenerateConfig, "generate-config", false, "Generate example configuration and exit")
 
 	flag.Parse()
 
