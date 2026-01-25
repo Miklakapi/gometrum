@@ -1,3 +1,73 @@
+# gometrum example configuration
+#
+# Notes:
+# - Sensors are enabled by presence.
+#   Comment out a sensor block to disable it.
+# - Each sensor defines its own refresh interval.
+# - Intervals use Go duration format: "5s", "30s", "1m", "5m".
+
 mqtt:
+  # MQTT broker address
   host: localhost
+
+  # MQTT broker port
   port: 1883
+
+  # Optional authentication
+  username: ""
+  password: ""
+
+  # MQTT client identifier (optional).
+  # If empty, a generated ID may be used.
+  client_id: ""
+
+  # Home Assistant MQTT discovery prefix
+  discovery_prefix: "homeassistant"
+
+  # Base topic for published sensor states
+  state_prefix: "gometrum"
+
+agent:
+  # Unique device identifier used by Home Assistant.
+  # If empty, hostname may be used as fallback.
+  device_id: ""
+
+  # Human-readable device name
+  device_name: "gometrum"
+
+  # Device manufacturer (Home Assistant metadata)
+  manufacturer: "gometrum"
+
+  # Device model (Home Assistant metadata)
+  model: "linux-host"
+
+sensors:
+  # CPU usage percentage
+  cpu_usage:
+    name: "CPU usage"
+    interval: "30s"
+    ha:
+      # Optional Home Assistant overrides
+      icon: "mdi:cpu-64-bit"
+      unit: "%"
+
+  memory_usage:
+    name: "RAM usage"
+    interval: "30s"
+
+  # Disk usage per mount point
+  disk_usage:
+    name: "Disk usage"
+    interval: "30s"
+
+    # Only include selected mount points.
+    # If omitted, all mount points are included.
+    include_mounts: ["/", "/mnt/data"]
+
+    # Exclude specific mount points
+    exclude_mounts: ["/boot", "/snap"]
+
+  # GPU usage (if supported by the system)
+  gpu_usage:
+    name: "GPU usage"
+    interval: "30s"
