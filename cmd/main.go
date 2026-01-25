@@ -3,17 +3,19 @@ package main
 import (
 	"context"
 	"fmt"
+	"log/slog"
 	"os"
 	"os/signal"
 	"syscall"
 
+	"github.com/Miklakapi/gometrum/internal/agent"
 	"github.com/Miklakapi/gometrum/internal/cli"
 	"github.com/Miklakapi/gometrum/internal/config"
 	"github.com/Miklakapi/gometrum/internal/logger"
 )
 
 func main() {
-	_, stop := signal.NotifyContext(context.Background(), os.Interrupt, syscall.SIGTERM)
+	appCtx, stop := signal.NotifyContext(context.Background(), os.Interrupt, syscall.SIGTERM)
 	defer stop()
 
 	flags, err := cli.ParseFlags()
@@ -48,7 +50,16 @@ func main() {
 
 	logger.SetupLogger(flags.LogLevel)
 
-	// Handle normal run
+	a, err := agent.New()
+	if err != nil {
+		slog.Error("failed to initialize agent", "err", err)
+		os.Exit(1)
+	}
+
+	if err = a.Run(appCtx); err != nil {
+		slog.Error("agent stopped with error", "err", err)
+		os.Exit(1)
+	}
 }
 
 func printErrorAndExit(err error, code int) {
