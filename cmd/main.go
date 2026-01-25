@@ -18,8 +18,7 @@ func main() {
 
 	flags, err := cli.ParseFlags()
 	if err != nil {
-		fmt.Fprintln(os.Stderr, err)
-		os.Exit(2)
+		printErrorAndExit(err, 2)
 	}
 
 	switch {
@@ -30,22 +29,19 @@ func main() {
 		}
 
 		if err = config.SaveExample(flags.ConfigPath); err != nil {
-			fmt.Fprintln(os.Stderr, err)
-			os.Exit(1)
+			printErrorAndExit(err, 1)
 		}
 		return
 	case flags.PrintConfig:
 		conf, err := config.LoadString(flags.ConfigPath)
 		if err != nil {
-			fmt.Fprintln(os.Stderr, err)
-			os.Exit(1)
+			printErrorAndExit(err, 1)
 		}
 		fmt.Print(conf)
 		return
 	case flags.Validate:
 		if err = config.Validate(flags.ConfigPath); err != nil {
-			fmt.Fprintln(os.Stderr, err)
-			os.Exit(1)
+			printErrorAndExit(err, 1)
 		}
 		return
 	}
@@ -53,4 +49,9 @@ func main() {
 	logger.SetupLogger(flags.LogLevel)
 
 	// Handle normal run
+}
+
+func printErrorAndExit(err error, code int) {
+	fmt.Fprintln(os.Stderr, err)
+	os.Exit(code)
 }
