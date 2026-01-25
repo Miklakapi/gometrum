@@ -9,6 +9,10 @@ import (
 //go:embed example.yaml
 var ExampleYAML string
 
+type Config struct {
+	host string
+}
+
 func SaveExample(path string) error {
 	dir := filepath.Dir(path)
 	if dir != "." {
@@ -19,7 +23,23 @@ func SaveExample(path string) error {
 	return os.WriteFile(path, []byte(ExampleYAML), 0644)
 }
 
-func Load(path string) (string, error) {
+func load(path string) ([]byte, error) {
+	data, err := os.ReadFile(path)
+	if err != nil {
+		return nil, err
+	}
+	return data, nil
+}
+
+func LoadString(path string) (string, error) {
+	data, err := load(path)
+	if err != nil {
+		return "", err
+	}
+	return string(data), nil
+}
+
+func LoadConfig(path string) (Config, error) {
 	panic("TODO")
 }
 

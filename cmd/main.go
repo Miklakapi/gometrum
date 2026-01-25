@@ -35,7 +35,7 @@ func main() {
 		}
 		return
 	case flags.PrintConfig:
-		conf, err := config.Load(flags.ConfigPath)
+		conf, err := config.LoadString(flags.ConfigPath)
 		if err != nil {
 			fmt.Fprintln(os.Stderr, err)
 			os.Exit(1)
