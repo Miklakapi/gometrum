@@ -3,7 +3,6 @@ package main
 import (
 	"context"
 	"fmt"
-	"log"
 	"os"
 	"os/signal"
 	"syscall"
@@ -19,31 +18,39 @@ func main() {
 
 	flags, err := cli.ParseFlags()
 	if err != nil {
-		log.Fatalln(err)
+		fmt.Fprintln(os.Stderr, err)
+		os.Exit(2)
 	}
-
-	logger.SetupLogger(flags.LogLevel)
 
 	switch {
 	case flags.GenerateConfig:
-		// generate config + exit
-		// available flags: configPath + logLevel
 		if flags.ConfigPath == "" {
 			fmt.Print(config.ExampleYAML)
 			return
 		}
-		// TODO: write to file flags.ConfigPath
-		fmt.Print(config.ExampleYAML)
+
+		if err = config.SaveExample(flags.ConfigPath); err != nil {
+			fmt.Fprintln(os.Stderr, err)
+			os.Exit(1)
+		}
 		return
 	case flags.PrintConfig:
-		// print config + exit
-		// available flags: configPath + logLevel
+		conf, err := config.Load(flags.ConfigPath)
+		if err != nil {
+			fmt.Fprintln(os.Stderr, err)
+			os.Exit(1)
+		}
+		fmt.Print(conf)
 		return
 	case flags.Validate:
-		// validate config + exit
-		// available flags: configPath + logLevel
+		if err = config.Validate(flags.ConfigPath); err != nil {
+			fmt.Fprintln(os.Stderr, err)
+			os.Exit(1)
+		}
 		return
 	}
 
-	// Handle dry run + one + normal run
+	logger.SetupLogger(flags.LogLevel)
+
+	// Handle normal run
 }
