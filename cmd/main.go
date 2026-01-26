@@ -50,7 +50,21 @@ func main() {
 
 	logger.SetupLogger(flags.LogLevel)
 
-	a, err := agent.New()
+	s := agent.Settings{
+		Host:            "",
+		Port:            "",
+		Username:        "",
+		Password:        "",
+		ClientID:        "",
+		DiscoveryPrefix: "",
+		StatePrefix:     "",
+		DeviceId:        "",
+		DeviceName:      "",
+		Manufacturer:    "",
+		Model:           "",
+	}
+
+	a, err := agent.New(s)
 	if err != nil {
 		slog.Error("failed to initialize agent", "err", err)
 		os.Exit(1)
