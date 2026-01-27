@@ -4,6 +4,8 @@ import (
 	_ "embed"
 	"os"
 	"path/filepath"
+
+	yaml "gopkg.in/yaml.v3"
 )
 
 //go:embed example.yaml
@@ -19,7 +21,48 @@ func SaveExample(path string) error {
 	return os.WriteFile(path, []byte(ExampleYAML), 0644)
 }
 
-func load(path string) ([]byte, error) {
+func LoadString(path string) (string, error) {
+	data, err := loadBytes(path)
+	if err != nil {
+		return "", err
+	}
+	return string(data), nil
+}
+
+func LoadAndValidate(path string) (Config, error) {
+	cfg, err := LoadConfig(path)
+	if err != nil {
+		return cfg, err
+	}
+
+	if err := ValidateConfig(cfg); err != nil {
+		return Config{}, err
+	}
+
+	return cfg, nil
+}
+
+func LoadConfig(path string) (Config, error) {
+	var cfg Config
+
+	data, err := loadBytes(path)
+	if err != nil {
+		return cfg, err
+	}
+
+	if err := yaml.Unmarshal(data, &cfg); err != nil {
+		return cfg, err
+	}
+
+	applyDefaults(&cfg)
+	return cfg, nil
+}
+
+func ValidateConfig(cfg Config) error {
+	panic("TODO")
+}
+
+func loadBytes(path string) ([]byte, error) {
 	data, err := os.ReadFile(path)
 	if err != nil {
 		return nil, err
@@ -27,18 +70,24 @@ func load(path string) ([]byte, error) {
 	return data, nil
 }
 
-func LoadString(path string) (string, error) {
-	data, err := load(path)
-	if err != nil {
-		return "", err
+func applyDefaults(cfg *Config) {
+	if cfg.MQTT.Port == 0 {
+		cfg.MQTT.Port = 1883
 	}
-	return string(data), nil
-}
+	if cfg.MQTT.DiscoveryPrefix == "" {
+		cfg.MQTT.DiscoveryPrefix = "homeassistant"
+	}
+	if cfg.MQTT.StatePrefix == "" {
+		cfg.MQTT.StatePrefix = "gometrum"
+	}
 
-func LoadConfig(path string) (Config, error) {
-	panic("TODO")
-}
-
-func Validate(path string) error {
-	panic("TODO")
+	if cfg.Agent.DeviceName == "" {
+		cfg.Agent.DeviceName = "gometrum"
+	}
+	if cfg.Agent.Manufacturer == "" {
+		cfg.Agent.Manufacturer = "gometrum"
+	}
+	if cfg.Agent.Model == "" {
+		cfg.Agent.Model = "linux-host"
+	}
 }

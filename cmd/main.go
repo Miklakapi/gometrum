@@ -42,7 +42,7 @@ func main() {
 		fmt.Print(conf)
 		return
 	case flags.Validate:
-		if err = config.Validate(flags.ConfigPath); err != nil {
+		if _, err = config.LoadAndValidate(flags.ConfigPath); err != nil {
 			printErrorAndExit(err, 1)
 		}
 		return
