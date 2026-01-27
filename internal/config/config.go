@@ -9,10 +9,6 @@ import (
 //go:embed example.yaml
 var ExampleYAML string
 
-type Config struct {
-	host string
-}
-
 func SaveExample(path string) error {
 	dir := filepath.Dir(path)
 	if dir != "." {
