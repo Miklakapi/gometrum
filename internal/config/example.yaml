@@ -17,8 +17,8 @@ mqtt:
   username: ""
   password: ""
 
-  # MQTT client identifier (optional).
-  # If empty, a generated ID may be used.
+  # MQTT client identifier.
+  # Must be unique per agent instance.
   client_id: ""
 
   # Home Assistant MQTT discovery prefix
@@ -29,7 +29,7 @@ mqtt:
 
 agent:
   # Unique device identifier used by Home Assistant.
-  # If empty, hostname may be used as fallback.
+  # Required. Must be unique per device.
   device_id: ""
 
   # Human-readable device name
