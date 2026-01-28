@@ -9,13 +9,14 @@ type Config struct {
 }
 
 type MQTTConfig struct {
-	Host            string `yaml:"host"`
-	Port            int    `yaml:"port"`
-	Username        string `yaml:"username"`
-	Password        string `yaml:"password"`
-	ClientID        string `yaml:"client_id"`
-	DiscoveryPrefix string `yaml:"discovery_prefix"`
-	StatePrefix     string `yaml:"state_prefix"`
+	Host            string        `yaml:"host"`
+	Port            int           `yaml:"port"`
+	Username        string        `yaml:"username"`
+	Password        string        `yaml:"password"`
+	ClientID        string        `yaml:"client_id"`
+	DiscoveryPrefix string        `yaml:"discovery_prefix"`
+	StatePrefix     string        `yaml:"state_prefix"`
+	DefaultInterval time.Duration `yaml:"default_interval"`
 }
 
 type AgentConfig struct {

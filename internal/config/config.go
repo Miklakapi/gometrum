@@ -6,6 +6,7 @@ import (
 	"os"
 	"path/filepath"
 	"strings"
+	"time"
 
 	yaml "gopkg.in/yaml.v3"
 )
@@ -82,6 +83,9 @@ func ValidateConfig(cfg Config) error {
 	if strings.TrimSpace(cfg.MQTT.StatePrefix) == "" {
 		return errors.New("config: mqtt.state_prefix cannot be empty")
 	}
+	if cfg.MQTT.DefaultInterval <= 0 {
+		return errors.New("config: mqtt.default_interval must be > 0 (e.g. \"30s\")")
+	}
 
 	if strings.TrimSpace(cfg.Agent.DeviceID) == "" {
 		return errors.New("config: agent.device_id is required (must be unique per device)")
@@ -104,11 +108,8 @@ func ValidateConfig(cfg Config) error {
 		if strings.TrimSpace(sensorKey) == "" {
 			return errors.New("config: sensors contains an empty key")
 		}
-		if strings.TrimSpace(sensorCfg.Name) == "" {
-			return errors.New("config: sensors." + sensorKey + ".name is required")
-		}
 		if sensorCfg.Interval <= 0 {
-			return errors.New("config: sensors." + sensorKey + ".interval must be > 0 (e.g. \"30s\")")
+			return errors.New("config: sensors." + sensorKey + ".interval resolved to 0 (check mqtt.default_interval)")
 		}
 
 		if len(sensorCfg.IncludeMounts) > 0 || len(sensorCfg.ExcludeMounts) > 0 {
@@ -159,6 +160,9 @@ func applyDefaults(cfg *Config) {
 	if cfg.MQTT.StatePrefix == "" {
 		cfg.MQTT.StatePrefix = "gometrum"
 	}
+	if cfg.MQTT.DefaultInterval <= 0 {
+		cfg.MQTT.DefaultInterval = time.Duration(1 * time.Minute)
+	}
 
 	if cfg.Agent.DeviceName == "" {
 		cfg.Agent.DeviceName = "gometrum"
@@ -168,5 +172,12 @@ func applyDefaults(cfg *Config) {
 	}
 	if cfg.Agent.Model == "" {
 		cfg.Agent.Model = "linux-host"
+	}
+
+	for key, sensorCfg := range cfg.Sensors {
+		if sensorCfg.Interval <= 0 {
+			sensorCfg.Interval = cfg.MQTT.DefaultInterval
+			cfg.Sensors[key] = sensorCfg
+		}
 	}
 }

@@ -27,6 +27,10 @@ mqtt:
   # Base topic for published sensor states
   state_prefix: "gometrum"
 
+  # Default refresh interval for sensors.
+  # Used only when a sensor does not define its own interval.
+  default_interval: "1m"
+
 agent:
   # Unique device identifier used by Home Assistant.
   # Required. Must be unique per device.
@@ -71,3 +75,6 @@ sensors:
   gpu_usage:
     name: "GPU usage"
     interval: "30s"
+  
+  # Wi-Fi signal strength
+  wifi_signal: {}
