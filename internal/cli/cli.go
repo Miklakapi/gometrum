@@ -47,7 +47,7 @@ func ParseFlags() (CLI, error) {
 	if cfg.Quiet {
 		cfg.LogLevel = "error"
 	} else if strings.TrimSpace(cfg.LogLevel) == "" {
-		cfg.LogLevel = "warn"
+		cfg.LogLevel = "info"
 	}
 
 	if err := validateFlags(cfg); err != nil {

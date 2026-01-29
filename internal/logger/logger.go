@@ -18,7 +18,7 @@ func SetupLogger(level string) {
 	case "error":
 		lvl = slog.LevelError
 	default:
-		lvl = slog.LevelWarn
+		lvl = slog.LevelInfo
 	}
 
 	handler := slog.NewTextHandler(os.Stdout, &slog.HandlerOptions{
