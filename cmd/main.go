@@ -12,6 +12,7 @@ import (
 	"github.com/Miklakapi/gometrum/internal/cli"
 	"github.com/Miklakapi/gometrum/internal/config"
 	"github.com/Miklakapi/gometrum/internal/logger"
+	"github.com/Miklakapi/gometrum/internal/sensors"
 )
 
 func main() {
@@ -56,6 +57,18 @@ func main() {
 		os.Exit(1)
 	}
 
+	err = sensors.Prepare(&cfg)
+	if err != nil {
+		slog.Error("failed to load sensors configuration", "err", err)
+		os.Exit(1)
+	}
+
+	sens, err := sensors.Build(cfg)
+	if err != nil {
+		slog.Error("failed to create sensors from configuration", "err", err)
+		os.Exit(1)
+	}
+
 	s := agent.Settings{
 		Host:            cfg.MQTT.Host,
 		Port:            cfg.MQTT.Port,
@@ -70,7 +83,7 @@ func main() {
 		Model:           cfg.Agent.Model,
 	}
 
-	a, err := agent.New(s)
+	a, err := agent.New(s, sens)
 	if err != nil {
 		slog.Error("failed to initialize agent", "err", err)
 		os.Exit(1)

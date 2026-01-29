@@ -8,6 +8,7 @@ import (
 	"time"
 
 	"github.com/Miklakapi/gometrum/internal/mqtt"
+	"github.com/Miklakapi/gometrum/internal/sensors"
 
 	MQTT "github.com/eclipse/paho.mqtt.golang"
 )
@@ -31,7 +32,7 @@ type Settings struct {
 	Model        string
 }
 
-func New(s Settings) (*agent, error) {
+func New(s Settings, sens []sensors.Sensor) (*agent, error) {
 	o := MQTT.NewClientOptions()
 	addr := net.JoinHostPort(s.Host, strconv.Itoa(s.Port))
 	o.AddBroker("tcp://" + addr)
