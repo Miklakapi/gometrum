@@ -6,3 +6,4 @@ bin
 *.log
 *.logs
 .env
+test

@@ -50,18 +50,24 @@ func main() {
 
 	logger.SetupLogger(flags.LogLevel)
 
+	cfg, err := config.LoadAndValidate(flags.ConfigPath)
+	if err != nil {
+		slog.Error("failed to load configuration", "err", err)
+		os.Exit(1)
+	}
+
 	s := agent.Settings{
-		Host:            "",
-		Port:            "",
-		Username:        "",
-		Password:        "",
-		ClientID:        "",
-		DiscoveryPrefix: "",
-		StatePrefix:     "",
-		DeviceId:        "",
-		DeviceName:      "",
-		Manufacturer:    "",
-		Model:           "",
+		Host:            cfg.MQTT.Host,
+		Port:            cfg.MQTT.Port,
+		Username:        cfg.MQTT.Username,
+		Password:        cfg.MQTT.Password,
+		ClientID:        cfg.MQTT.ClientID,
+		DiscoveryPrefix: cfg.MQTT.DiscoveryPrefix,
+		StatePrefix:     cfg.MQTT.StatePrefix,
+		DeviceId:        cfg.Agent.DeviceID,
+		DeviceName:      cfg.Agent.DeviceName,
+		Manufacturer:    cfg.Agent.Manufacturer,
+		Model:           cfg.Agent.Model,
 	}
 
 	a, err := agent.New(s)

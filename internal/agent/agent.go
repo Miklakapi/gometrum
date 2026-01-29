@@ -2,6 +2,9 @@ package agent
 
 import (
 	"context"
+	"log/slog"
+	"net"
+	"strconv"
 	"time"
 
 	"github.com/Miklakapi/gometrum/internal/mqtt"
@@ -15,7 +18,7 @@ type agent struct {
 
 type Settings struct {
 	Host            string
-	Port            string
+	Port            int
 	Username        string
 	Password        string
 	ClientID        string
@@ -30,8 +33,8 @@ type Settings struct {
 
 func New(s Settings) (*agent, error) {
 	o := MQTT.NewClientOptions()
-	brokerURL := "tcp://" + s.Host + ":" + s.Port
-	o.AddBroker(brokerURL)
+	addr := net.JoinHostPort(s.Host, strconv.Itoa(s.Port))
+	o.AddBroker("tcp://" + addr)
 
 	o.SetClientID(s.ClientID)
 	o.SetUsername(s.Username)
@@ -53,5 +56,20 @@ func New(s Settings) (*agent, error) {
 }
 
 func (a *agent) Run(ctx context.Context) error {
-	panic("TODO")
+	if err := a.client.Connect(10 * time.Second); err != nil {
+		return err
+	}
+	defer a.client.Close()
+
+	ticker := time.NewTicker(10 * time.Second)
+
+	for {
+		select {
+		case <-ctx.Done():
+			return nil
+		case <-ticker.C:
+			slog.Info("Test")
+			// a.mqtt.Publish(...)
+		}
+	}
 }
