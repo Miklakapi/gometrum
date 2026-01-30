@@ -57,46 +57,47 @@ func LoadConfig(path string) (Config, error) {
 		return cfg, err
 	}
 
+	normalizeConfig(&cfg)
 	applyDefaults(&cfg)
 	return cfg, nil
 }
 
 func ValidateConfig(cfg Config) error {
-	if strings.TrimSpace(cfg.MQTT.Host) == "" {
+	if cfg.MQTT.Host == "" {
 		return errors.New("config: mqtt.host is required")
 	}
 	if cfg.MQTT.Port <= 0 || cfg.MQTT.Port > 65535 {
 		return errors.New("config: mqtt.port must be a valid TCP port (1-65535)")
 	}
-	if strings.TrimSpace(cfg.MQTT.Username) != "" && strings.TrimSpace(cfg.MQTT.Password) == "" {
+	if cfg.MQTT.Username != "" && cfg.MQTT.Password == "" {
 		return errors.New("config: mqtt.password is required when mqtt.username is set")
 	}
-	if strings.TrimSpace(cfg.MQTT.Password) != "" && strings.TrimSpace(cfg.MQTT.Username) == "" {
+	if cfg.MQTT.Password != "" && cfg.MQTT.Username == "" {
 		return errors.New("config: mqtt.username is required when mqtt.password is set")
 	}
-	if strings.TrimSpace(cfg.MQTT.ClientID) == "" {
+	if cfg.MQTT.ClientID == "" {
 		return errors.New("config: mqtt.client_id is required (must be unique per device)")
 	}
-	if strings.TrimSpace(cfg.MQTT.DiscoveryPrefix) == "" {
+	if cfg.MQTT.DiscoveryPrefix == "" {
 		return errors.New("config: mqtt.discovery_prefix cannot be empty")
 	}
-	if strings.TrimSpace(cfg.MQTT.StatePrefix) == "" {
+	if cfg.MQTT.StatePrefix == "" {
 		return errors.New("config: mqtt.state_prefix cannot be empty")
 	}
 	if cfg.MQTT.DefaultInterval <= 0 {
 		return errors.New("config: mqtt.default_interval must be > 0 (e.g. \"30s\")")
 	}
 
-	if strings.TrimSpace(cfg.Agent.DeviceID) == "" {
+	if cfg.Agent.DeviceID == "" {
 		return errors.New("config: agent.device_id is required (must be unique per device)")
 	}
-	if strings.TrimSpace(cfg.Agent.DeviceName) == "" {
+	if cfg.Agent.DeviceName == "" {
 		return errors.New("config: agent.device_name cannot be empty")
 	}
-	if strings.TrimSpace(cfg.Agent.Manufacturer) == "" {
+	if cfg.Agent.Manufacturer == "" {
 		return errors.New("config: agent.manufacturer cannot be empty")
 	}
-	if strings.TrimSpace(cfg.Agent.Model) == "" {
+	if cfg.Agent.Model == "" {
 		return errors.New("config: agent.model cannot be empty")
 	}
 
@@ -105,7 +106,7 @@ func ValidateConfig(cfg Config) error {
 	}
 
 	for sensorKey, sensorCfg := range cfg.Sensors {
-		if strings.TrimSpace(sensorKey) == "" {
+		if sensorKey == "" {
 			return errors.New("config: sensors contains an empty key")
 		}
 		if sensorCfg.Interval <= 0 {
@@ -115,7 +116,6 @@ func ValidateConfig(cfg Config) error {
 		if len(sensorCfg.IncludeMounts) > 0 || len(sensorCfg.ExcludeMounts) > 0 {
 			includeSet := make(map[string]struct{}, len(sensorCfg.IncludeMounts))
 			for _, m := range sensorCfg.IncludeMounts {
-				m = strings.TrimSpace(m)
 				if m == "" {
 					return errors.New("config: sensors." + sensorKey + ".include_mounts contains an empty mount")
 				}
@@ -124,7 +124,6 @@ func ValidateConfig(cfg Config) error {
 
 			excludeSet := make(map[string]struct{}, len(sensorCfg.ExcludeMounts))
 			for _, m := range sensorCfg.ExcludeMounts {
-				m = strings.TrimSpace(m)
 				if m == "" {
 					return errors.New("config: sensors." + sensorKey + ".exclude_mounts contains an empty mount")
 				}
@@ -148,6 +147,47 @@ func loadBytes(path string) ([]byte, error) {
 		return nil, err
 	}
 	return data, nil
+}
+
+func normalizeConfig(cfg *Config) {
+	cfg.MQTT.Host = strings.TrimSpace(cfg.MQTT.Host)
+	cfg.MQTT.Username = strings.TrimSpace(cfg.MQTT.Username)
+	cfg.MQTT.Password = strings.TrimSpace(cfg.MQTT.Password)
+	cfg.MQTT.ClientID = strings.TrimSpace(cfg.MQTT.ClientID)
+	cfg.MQTT.DiscoveryPrefix = strings.TrimSpace(cfg.MQTT.DiscoveryPrefix)
+	cfg.MQTT.StatePrefix = strings.TrimSpace(cfg.MQTT.StatePrefix)
+
+	cfg.Agent.DeviceID = strings.TrimSpace(cfg.Agent.DeviceID)
+	cfg.Agent.DeviceName = strings.TrimSpace(cfg.Agent.DeviceName)
+	cfg.Agent.Manufacturer = strings.TrimSpace(cfg.Agent.Manufacturer)
+	cfg.Agent.Model = strings.TrimSpace(cfg.Agent.Model)
+
+	normalized := make(map[string]SensorConfig, len(cfg.Sensors))
+
+	for key, sensor := range cfg.Sensors {
+		sensorKey := strings.TrimSpace(key)
+		if sensorKey == "" {
+			continue
+		}
+
+		sensor.Name = strings.TrimSpace(sensor.Name)
+
+		for i, m := range sensor.IncludeMounts {
+			sensor.IncludeMounts[i] = strings.TrimSpace(m)
+		}
+		for i, m := range sensor.ExcludeMounts {
+			sensor.ExcludeMounts[i] = strings.TrimSpace(m)
+		}
+
+		if sensor.HA != nil {
+			sensor.HA.Icon = strings.TrimSpace(sensor.HA.Icon)
+			sensor.HA.Unit = strings.TrimSpace(sensor.HA.Unit)
+		}
+
+		normalized[sensorKey] = sensor
+	}
+
+	cfg.Sensors = normalized
 }
 
 func applyDefaults(cfg *Config) {

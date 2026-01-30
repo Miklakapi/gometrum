@@ -2,7 +2,6 @@ package sensors
 
 import (
 	"errors"
-	"strings"
 
 	"github.com/Miklakapi/gometrum/internal/config"
 )
@@ -33,7 +32,7 @@ func Normalize(cfg *config.Config) error {
 			return errors.New("sensors: unknown sensor type: " + sensorKey)
 		}
 
-		if strings.TrimSpace(sensorCfg.Name) == "" {
+		if sensorCfg.Name == "" {
 			sensorCfg.Name = def.DefaultName
 		}
 
@@ -45,10 +44,10 @@ func Normalize(cfg *config.Config) error {
 			if sensorCfg.HA == nil {
 				sensorCfg.HA = &config.HASensorConfig{}
 			}
-			if strings.TrimSpace(sensorCfg.HA.Icon) == "" && def.DefaultIcon != "" {
+			if sensorCfg.HA.Icon == "" && def.DefaultIcon != "" {
 				sensorCfg.HA.Icon = def.DefaultIcon
 			}
-			if strings.TrimSpace(sensorCfg.HA.Unit) == "" && def.DefaultUnit != "" {
+			if sensorCfg.HA.Unit == "" && def.DefaultUnit != "" {
 				sensorCfg.HA.Unit = def.DefaultUnit
 			}
 		}
@@ -65,7 +64,7 @@ func Validate(cfg config.Config) error {
 			return errors.New("sensors: unknown sensor type: " + sensorKey)
 		}
 
-		if strings.TrimSpace(sensorCfg.Name) == "" {
+		if sensorCfg.Name == "" {
 			return errors.New("sensors." + sensorKey + ": name is empty and no DefaultName in registry")
 		}
 		if sensorCfg.Interval <= 0 {
