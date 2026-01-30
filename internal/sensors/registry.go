@@ -1,6 +1,6 @@
 package sensors
 
-var _ = map[string]SensorDefinition{
+var registry = map[string]SensorDefinition{
 	// CPU
 	"cpu_usage": {
 		DefaultName: "CPU usage",
