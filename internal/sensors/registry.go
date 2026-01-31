@@ -1,21 +1,34 @@
 package sensors
 
+import (
+	"github.com/Miklakapi/gometrum/internal/config"
+)
+
 var registry = map[string]SensorDefinition{
 	// CPU
 	"cpu_usage": {
 		DefaultName: "CPU usage",
 		DefaultIcon: "mdi:cpu-64-bit",
 		DefaultUnit: "%",
+		Factory: func(key string, cfg config.SensorConfig) ([]Sensor, error) {
+			return []Sensor{newCPUUsageSensor(key, cfg)}, nil
+		},
 	},
 	"cpu_load": {
 		DefaultName: "CPU load",
 		DefaultIcon: "mdi:chart-line",
 		DefaultUnit: "",
+		Factory: func(key string, cfg config.SensorConfig) ([]Sensor, error) {
+			return []Sensor{newCPULoadSensor(key, cfg)}, nil
+		},
 	},
 	"cpu_temp": {
 		DefaultName: "CPU temperature",
 		DefaultIcon: "mdi:thermometer",
 		DefaultUnit: "°C",
+		Factory: func(key string, cfg config.SensorConfig) ([]Sensor, error) {
+			return []Sensor{newCPUTempSensor(key, cfg)}, nil
+		},
 	},
 
 	// System
@@ -23,11 +36,17 @@ var registry = map[string]SensorDefinition{
 		DefaultName: "System uptime",
 		DefaultIcon: "mdi:timer-outline",
 		DefaultUnit: "s",
+		Factory: func(key string, cfg config.SensorConfig) ([]Sensor, error) {
+			return []Sensor{newUptimeSensor(key, cfg)}, nil
+		},
 	},
 	"os_version": {
 		DefaultName: "OS version",
 		DefaultIcon: "mdi:linux",
 		DefaultUnit: "",
+		Factory: func(key string, cfg config.SensorConfig) ([]Sensor, error) {
+			return []Sensor{newOSVersionSensor(key, cfg)}, nil
+		},
 	},
 
 	// Memory
@@ -35,11 +54,17 @@ var registry = map[string]SensorDefinition{
 		DefaultName: "Memory usage",
 		DefaultIcon: "mdi:memory",
 		DefaultUnit: "%",
+		Factory: func(key string, cfg config.SensorConfig) ([]Sensor, error) {
+			return []Sensor{newMemoryUsageSensor(key, cfg)}, nil
+		},
 	},
 	"swap_usage": {
 		DefaultName: "Swap usage",
 		DefaultIcon: "mdi:swap-horizontal",
 		DefaultUnit: "%",
+		Factory: func(key string, cfg config.SensorConfig) ([]Sensor, error) {
+			return []Sensor{newSwapUsageSensor(key, cfg)}, nil
+		},
 	},
 
 	// Disk
@@ -47,6 +72,9 @@ var registry = map[string]SensorDefinition{
 		DefaultName: "Disk usage",
 		DefaultIcon: "mdi:harddisk",
 		DefaultUnit: "%",
+		Factory: func(key string, cfg config.SensorConfig) ([]Sensor, error) {
+			return newDiskUsageSensors(key, cfg), nil
+		},
 	},
 
 	// Network
@@ -54,11 +82,17 @@ var registry = map[string]SensorDefinition{
 		DefaultName: "Public IP",
 		DefaultIcon: "mdi:ip",
 		DefaultUnit: "",
+		Factory: func(key string, cfg config.SensorConfig) ([]Sensor, error) {
+			return []Sensor{newPublicIPSensor(key, cfg)}, nil
+		},
 	},
 	"wifi_signal": {
 		DefaultName: "Wi-Fi signal",
 		DefaultIcon: "mdi:wifi",
 		DefaultUnit: "%",
+		Factory: func(key string, cfg config.SensorConfig) ([]Sensor, error) {
+			return []Sensor{newWiFiSignalSensor(key, cfg)}, nil
+		},
 	},
 
 	// GPU
@@ -66,20 +100,32 @@ var registry = map[string]SensorDefinition{
 		DefaultName: "GPU usage",
 		DefaultIcon: "mdi:gpu",
 		DefaultUnit: "%",
+		Factory: func(key string, cfg config.SensorConfig) ([]Sensor, error) {
+			return []Sensor{newGPUUsageSensor(key, cfg)}, nil
+		},
 	},
 	"gpu_memory_usage": {
 		DefaultName: "GPU memory usage",
 		DefaultIcon: "mdi:memory",
 		DefaultUnit: "%",
+		Factory: func(key string, cfg config.SensorConfig) ([]Sensor, error) {
+			return []Sensor{newGPUMemoryUsageSensor(key, cfg)}, nil
+		},
 	},
 	"gpu_temp": {
 		DefaultName: "GPU temperature",
 		DefaultIcon: "mdi:thermometer",
 		DefaultUnit: "°C",
+		Factory: func(key string, cfg config.SensorConfig) ([]Sensor, error) {
+			return []Sensor{newGPUTempSensor(key, cfg)}, nil
+		},
 	},
 	"gpu_power": {
 		DefaultName: "GPU power",
 		DefaultIcon: "mdi:flash",
 		DefaultUnit: "W",
+		Factory: func(key string, cfg config.SensorConfig) ([]Sensor, error) {
+			return []Sensor{newGPUPowerSensor(key, cfg)}, nil
+		},
 	},
 }
