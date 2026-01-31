@@ -12,9 +12,6 @@ type SensorDefinition struct {
 	DefaultUnit string
 }
 
-type Sensor struct {
-}
-
 func Prepare(cfg *config.Config) error {
 	if err := Normalize(cfg); err != nil {
 		return err
@@ -73,8 +70,4 @@ func Validate(cfg config.Config) error {
 	}
 
 	return nil
-}
-
-func Build(cfg config.Config) ([]Sensor, error) {
-	panic("TODO")
 }
