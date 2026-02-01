@@ -15,6 +15,16 @@ import (
 
 type agent struct {
 	client *mqtt.MQTTClient
+
+	groupedSensors map[time.Duration][]sensors.Sensor
+
+	stateBase     string
+	discoveryBase string
+
+	deviceId     string
+	deviceName   string
+	manufacturer string
+	model        string
 }
 
 type Settings struct {
@@ -53,6 +63,16 @@ func New(s Settings, sens []sensors.Sensor) (*agent, error) {
 
 	return &agent{
 		client: client,
+
+		groupedSensors: groupByInterval(sens),
+
+		stateBase:     s.StatePrefix + "/" + s.DeviceId,
+		discoveryBase: s.DiscoveryPrefix,
+
+		deviceId:     s.DeviceId,
+		deviceName:   s.DeviceName,
+		manufacturer: s.Manufacturer,
+		model:        s.Model,
 	}, nil
 }
 
@@ -70,7 +90,16 @@ func (a *agent) Run(ctx context.Context) error {
 			return nil
 		case <-ticker.C:
 			slog.Info("Test")
-			// a.mqtt.Publish(...)
 		}
 	}
+}
+
+func groupByInterval(list []sensors.Sensor) map[time.Duration][]sensors.Sensor {
+	groups := make(map[time.Duration][]sensors.Sensor)
+
+	for _, s := range list {
+		groups[s.Interval()] = append(groups[s.Interval()], s)
+	}
+
+	return groups
 }
