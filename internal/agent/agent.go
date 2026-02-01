@@ -18,8 +18,9 @@ type agent struct {
 
 	groupedSensors map[time.Duration][]sensors.Sensor
 
-	stateBase     string
-	discoveryBase string
+	stateBase         string
+	discoveryBase     string
+	availabilityTopic string
 
 	deviceId     string
 	deviceName   string
@@ -59,15 +60,22 @@ func New(s Settings, sens []sensors.Sensor) (*agent, error) {
 	o.SetKeepAlive(30 * time.Second)
 	o.SetPingTimeout(10 * time.Second)
 
+	stateBase := s.StatePrefix + "/" + s.DeviceId
+	availabilityTopic := stateBase + "/availability"
+
+	o.SetWill(availabilityTopic, "offline", 1, true)
+
 	client := mqtt.New(o)
+	client.SetAvailability(availabilityTopic, []byte("online"))
 
 	return &agent{
 		client: client,
 
 		groupedSensors: groupByInterval(sens),
 
-		stateBase:     s.StatePrefix + "/" + s.DeviceId,
-		discoveryBase: s.DiscoveryPrefix,
+		stateBase:         stateBase,
+		discoveryBase:     s.DiscoveryPrefix,
+		availabilityTopic: availabilityTopic,
 
 		deviceId:     s.DeviceId,
 		deviceName:   s.DeviceName,
@@ -80,7 +88,14 @@ func (a *agent) Run(ctx context.Context) error {
 	if err := a.client.Connect(10 * time.Second); err != nil {
 		return err
 	}
-	defer a.client.Close()
+	defer func() {
+		if a.availabilityTopic != "" {
+			if err := a.client.Publish(a.availabilityTopic, 1, true, []byte("offline")); err != nil {
+				slog.Warn("mqtt publish offline failed", "topic", a.availabilityTopic, "err", err)
+			}
+		}
+		a.client.Close()
+	}()
 
 	ticker := time.NewTicker(10 * time.Second)
 
