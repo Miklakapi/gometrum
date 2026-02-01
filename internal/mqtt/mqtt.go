@@ -10,11 +10,27 @@ import (
 
 type MQTTClient struct {
 	client MQTT.Client
+
+	availabilityTopic string
+	onlinePayload     []byte
 }
 
 func New(o *MQTT.ClientOptions) *MQTTClient {
+	m := &MQTTClient{}
+
 	o.OnConnect = func(c MQTT.Client) {
 		slog.Info("mqtt connected")
+
+		if m.availabilityTopic != "" && len(m.onlinePayload) > 0 {
+			token := c.Publish(m.availabilityTopic, 1, true, m.onlinePayload)
+			if !token.WaitTimeout(5 * time.Second) {
+				slog.Warn("mqtt availability publish timeout", "topic", m.availabilityTopic)
+				return
+			}
+			if err := token.Error(); err != nil {
+				slog.Warn("mqtt availability publish failed", "topic", m.availabilityTopic, "err", err)
+			}
+		}
 	}
 
 	o.OnConnectionLost = func(c MQTT.Client, err error) {
@@ -25,11 +41,13 @@ func New(o *MQTT.ClientOptions) *MQTTClient {
 		slog.Info("mqtt reconnecting to", "servers", co.Servers)
 	}
 
-	client := MQTT.NewClient(o)
+	m.client = MQTT.NewClient(o)
+	return m
+}
 
-	return &MQTTClient{
-		client: client,
-	}
+func (m *MQTTClient) SetAvailability(topic string, onlinePayload []byte) {
+	m.availabilityTopic = topic
+	m.onlinePayload = onlinePayload
 }
 
 func (m *MQTTClient) Connect(timeout time.Duration) error {
