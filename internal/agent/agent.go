@@ -99,10 +99,13 @@ func (a *agent) Run(ctx context.Context) error {
 		a.client.Close()
 	}()
 
+	if err := a.publishDiscovery(); err != nil {
+		return err
+	}
+
 	var wg sync.WaitGroup
 
 	for interval, group := range a.groupedSensors {
-
 		wg.Go(func() {
 			ticker := time.NewTicker(interval)
 			defer ticker.Stop()

@@ -1,0 +1,69 @@
+package agent
+
+import (
+	"encoding/json"
+	"fmt"
+)
+
+type haSensorDiscovery struct {
+	Name              string    `json:"name"`
+	UniqueID          string    `json:"unique_id"`
+	StateTopic        string    `json:"state_topic"`
+	AvailabilityTopic string    `json:"availability_topic,omitempty"`
+	Icon              string    `json:"icon,omitempty"`
+	Unit              string    `json:"unit_of_measurement,omitempty"`
+	Device            *haDevice `json:"device,omitempty"`
+}
+
+type haDevice struct {
+	Identifiers  []string `json:"identifiers"`
+	Name         string   `json:"name"`
+	Manufacturer string   `json:"manufacturer,omitempty"`
+	Model        string   `json:"model,omitempty"`
+}
+
+func (a *agent) publishDiscovery() error {
+	dev := &haDevice{
+		Identifiers:  []string{a.deviceId},
+		Name:         a.deviceName,
+		Manufacturer: a.manufacturer,
+		Model:        a.model,
+	}
+
+	for _, group := range a.groupedSensors {
+		for _, s := range group {
+			key := s.Key()
+
+			stateTopic := fmt.Sprintf("%s/%s/state", a.stateBase, key)
+			configTopic := fmt.Sprintf("%s/sensor/%s/%s/config", a.discoveryBase, a.deviceId, key)
+
+			payload := haSensorDiscovery{
+				Name:              s.Name(),
+				UniqueID:          fmt.Sprintf("%s_%s", a.deviceId, key),
+				StateTopic:        stateTopic,
+				AvailabilityTopic: a.availabilityTopic,
+				Device:            dev,
+			}
+
+			if ha := s.HA(); ha != nil {
+				if ha.Icon != "" {
+					payload.Icon = ha.Icon
+				}
+				if ha.Unit != "" {
+					payload.Unit = ha.Unit
+				}
+			}
+
+			b, err := json.Marshal(payload)
+			if err != nil {
+				return fmt.Errorf("discovery marshal failed (sensor=%s): %w", key, err)
+			}
+
+			if err := a.client.Publish(configTopic, 1, true, b); err != nil {
+				return fmt.Errorf("discovery publish failed (sensor=%s, topic=%s): %w", key, configTopic, err)
+			}
+		}
+	}
+
+	return nil
+}
