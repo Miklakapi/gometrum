@@ -1,8 +1,12 @@
 package agent
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
+	"log/slog"
+
+	"github.com/Miklakapi/gometrum/internal/sensors"
 )
 
 type haSensorDiscovery struct {
@@ -66,4 +70,20 @@ func (a *agent) publishDiscovery() error {
 	}
 
 	return nil
+}
+
+func (a *agent) collectAndPublishGroup(ctx context.Context, group []sensors.Sensor) {
+	for _, s := range group {
+		val, err := s.Collect(ctx)
+		if err != nil {
+			slog.Error("collect failed", "sensor", s.Key(), "err", err)
+			continue
+		}
+
+		topic := fmt.Sprintf("%s/%s/state", a.stateBase, s.Key())
+
+		if err := a.client.Publish(topic, 1, true, []byte(val)); err != nil {
+			slog.Error("publish failed", "sensor", s.Key(), "topic", topic, "err", err)
+		}
+	}
 }
