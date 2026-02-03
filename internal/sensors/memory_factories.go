@@ -12,12 +12,7 @@ type memoryUsageSensor struct {
 
 func newMemoryUsageSensor(key string, cfg config.SensorConfig) Sensor {
 	return &memoryUsageSensor{
-		base: base{
-			key:      key,
-			name:     cfg.Name,
-			interval: cfg.Interval,
-			ha:       cfg.HA,
-		},
+		base: base{key: key, name: cfg.Name, interval: cfg.Interval, ha: cfg.HA},
 	}
 }
 
@@ -31,12 +26,7 @@ type swapUsageSensor struct {
 
 func newSwapUsageSensor(key string, cfg config.SensorConfig) Sensor {
 	return &swapUsageSensor{
-		base: base{
-			key:      key,
-			name:     cfg.Name,
-			interval: cfg.Interval,
-			ha:       cfg.HA,
-		},
+		base: base{key: key, name: cfg.Name, interval: cfg.Interval, ha: cfg.HA},
 	}
 }
 

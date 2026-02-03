@@ -13,12 +13,7 @@ type diskUsageSensor struct {
 func newDiskUsageSensors(key string, cfg config.SensorConfig) []Sensor {
 	return []Sensor{
 		&uptimeSensor{
-			base: base{
-				key:      key,
-				name:     cfg.Name,
-				interval: cfg.Interval,
-				ha:       cfg.HA,
-			},
+			base: base{key: key, name: cfg.Name, interval: cfg.Interval, ha: cfg.HA},
 		},
 	}
 }

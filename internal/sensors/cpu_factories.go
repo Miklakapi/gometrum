@@ -12,12 +12,7 @@ type cpuUsageSensor struct {
 
 func newCPUUsageSensor(key string, cfg config.SensorConfig) Sensor {
 	return &cpuUsageSensor{
-		base: base{
-			key:      key,
-			name:     cfg.Name,
-			interval: cfg.Interval,
-			ha:       cfg.HA,
-		},
+		base: base{key: key, name: cfg.Name, interval: cfg.Interval, ha: cfg.HA},
 	}
 }
 
@@ -31,12 +26,7 @@ type cpuLoadSensor struct {
 
 func newCPULoadSensor(key string, cfg config.SensorConfig) Sensor {
 	return &cpuLoadSensor{
-		base: base{
-			key:      key,
-			name:     cfg.Name,
-			interval: cfg.Interval,
-			ha:       cfg.HA,
-		},
+		base: base{key: key, name: cfg.Name, interval: cfg.Interval, ha: cfg.HA},
 	}
 }
 
@@ -50,12 +40,7 @@ type cpuTempSensor struct {
 
 func newCPUTempSensor(key string, cfg config.SensorConfig) Sensor {
 	return &cpuTempSensor{
-		base: base{
-			key:      key,
-			name:     cfg.Name,
-			interval: cfg.Interval,
-			ha:       cfg.HA,
-		},
+		base: base{key: key, name: cfg.Name, interval: cfg.Interval, ha: cfg.HA},
 	}
 }
 

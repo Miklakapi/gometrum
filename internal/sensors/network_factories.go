@@ -12,12 +12,7 @@ type publicIPSensor struct {
 
 func newPublicIPSensor(key string, cfg config.SensorConfig) Sensor {
 	return &publicIPSensor{
-		base: base{
-			key:      key,
-			name:     cfg.Name,
-			interval: cfg.Interval,
-			ha:       cfg.HA,
-		},
+		base: base{key: key, name: cfg.Name, interval: cfg.Interval, ha: cfg.HA},
 	}
 }
 
@@ -31,12 +26,7 @@ type wiFiSignalSensor struct {
 
 func newWiFiSignalSensor(key string, cfg config.SensorConfig) Sensor {
 	return &wiFiSignalSensor{
-		base: base{
-			key:      key,
-			name:     cfg.Name,
-			interval: cfg.Interval,
-			ha:       cfg.HA,
-		},
+		base: base{key: key, name: cfg.Name, interval: cfg.Interval, ha: cfg.HA},
 	}
 }
 

@@ -12,12 +12,7 @@ type uptimeSensor struct {
 
 func newUptimeSensor(key string, cfg config.SensorConfig) Sensor {
 	return &uptimeSensor{
-		base: base{
-			key:      key,
-			name:     cfg.Name,
-			interval: cfg.Interval,
-			ha:       cfg.HA,
-		},
+		base: base{key: key, name: cfg.Name, interval: cfg.Interval, ha: cfg.HA},
 	}
 }
 
@@ -31,12 +26,7 @@ type osVersionSensor struct {
 
 func newOSVersionSensor(key string, cfg config.SensorConfig) Sensor {
 	return &osVersionSensor{
-		base: base{
-			key:      key,
-			name:     cfg.Name,
-			interval: cfg.Interval,
-			ha:       cfg.HA,
-		},
+		base: base{key: key, name: cfg.Name, interval: cfg.Interval, ha: cfg.HA},
 	}
 }
 

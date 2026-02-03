@@ -12,12 +12,7 @@ type gpuUsageSensor struct {
 
 func newGPUUsageSensor(key string, cfg config.SensorConfig) Sensor {
 	return &gpuUsageSensor{
-		base: base{
-			key:      key,
-			name:     cfg.Name,
-			interval: cfg.Interval,
-			ha:       cfg.HA,
-		},
+		base: base{key: key, name: cfg.Name, interval: cfg.Interval, ha: cfg.HA},
 	}
 }
 
@@ -31,12 +26,7 @@ type gpuMemoryUsageSensor struct {
 
 func newGPUMemoryUsageSensor(key string, cfg config.SensorConfig) Sensor {
 	return &gpuMemoryUsageSensor{
-		base: base{
-			key:      key,
-			name:     cfg.Name,
-			interval: cfg.Interval,
-			ha:       cfg.HA,
-		},
+		base: base{key: key, name: cfg.Name, interval: cfg.Interval, ha: cfg.HA},
 	}
 }
 
@@ -50,12 +40,7 @@ type gpuTempSensor struct {
 
 func newGPUTempSensor(key string, cfg config.SensorConfig) Sensor {
 	return &gpuTempSensor{
-		base: base{
-			key:      key,
-			name:     cfg.Name,
-			interval: cfg.Interval,
-			ha:       cfg.HA,
-		},
+		base: base{key: key, name: cfg.Name, interval: cfg.Interval, ha: cfg.HA},
 	}
 }
 
@@ -69,12 +54,7 @@ type gpuPowerSensor struct {
 
 func newGPUPowerSensor(key string, cfg config.SensorConfig) Sensor {
 	return &gpuPowerSensor{
-		base: base{
-			key:      key,
-			name:     cfg.Name,
-			interval: cfg.Interval,
-			ha:       cfg.HA,
-		},
+		base: base{key: key, name: cfg.Name, interval: cfg.Interval, ha: cfg.HA},
 	}
 }
 
