@@ -74,16 +74,20 @@ func (a *agent) publishDiscovery() error {
 
 func (a *agent) collectAndPublishGroup(ctx context.Context, group []sensors.Sensor) {
 	for _, s := range group {
+		topic := fmt.Sprintf("%s/%s/state", a.stateBase, s.Key())
+
 		val, err := s.Collect(ctx)
 		if err != nil {
 			slog.Error("collect failed", "sensor", s.Key(), "err", err)
+
+			_ = a.client.Publish(topic, 1, true, []byte("unavailable"))
 			continue
 		}
 
-		topic := fmt.Sprintf("%s/%s/state", a.stateBase, s.Key())
-
 		if err := a.client.Publish(topic, 1, true, []byte(val)); err != nil {
 			slog.Error("publish failed", "sensor", s.Key(), "topic", topic, "err", err)
+		} else {
+			slog.Info("published", "sensor", s.Key(), "topic", topic, "value", val)
 		}
 	}
 }
