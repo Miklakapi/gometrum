@@ -109,10 +109,12 @@ func (a *agent) Run(ctx context.Context) error {
 			ticker := time.NewTicker(interval)
 			defer ticker.Stop()
 
+			sensorsStateCache := make(map[string]string, len(group))
+
 			for {
 				select {
 				case <-ticker.C:
-					a.collectAndPublishGroup(ctx, group)
+					a.collectAndPublishGroup(ctx, group, sensorsStateCache)
 				case <-ctx.Done():
 					return
 				}

@@ -72,7 +72,7 @@ func (a *agent) publishDiscovery() error {
 	return nil
 }
 
-func (a *agent) collectAndPublishGroup(ctx context.Context, group []sensors.Sensor) {
+func (a *agent) collectAndPublishGroup(ctx context.Context, group []sensors.Sensor, sensorsStateCache map[string]string) {
 	for _, s := range group {
 		topic := fmt.Sprintf("%s/%s/state", a.stateBase, s.Key())
 
@@ -80,6 +80,11 @@ func (a *agent) collectAndPublishGroup(ctx context.Context, group []sensors.Sens
 		if err != nil {
 			slog.Error("collect failed", "sensor", s.Key(), "err", err)
 		}
+
+		if prev, ok := sensorsStateCache[s.Key()]; ok && prev == val {
+			continue
+		}
+		sensorsStateCache[s.Key()] = val
 
 		if err := a.client.Publish(topic, 1, true, []byte(val)); err != nil {
 			slog.Error("publish failed", "sensor", s.Key(), "topic", topic, "err", err)
