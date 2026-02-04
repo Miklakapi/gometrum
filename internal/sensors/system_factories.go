@@ -2,8 +2,11 @@ package sensors
 
 import (
 	"context"
+	"errors"
+	"fmt"
 
 	"github.com/Miklakapi/gometrum/internal/config"
+	"github.com/shirou/gopsutil/v4/host"
 )
 
 type uptimeSensor struct {
@@ -17,7 +20,11 @@ func newUptimeSensor(key string, cfg config.SensorConfig) Sensor {
 }
 
 func (s *uptimeSensor) Collect(ctx context.Context) (string, error) {
-	return "test", nil
+	u, err := host.Uptime()
+	if err != nil {
+		return "unavailable", err
+	}
+	return fmt.Sprintf("%d", u), nil
 }
 
 type osVersionSensor struct {
@@ -31,5 +38,21 @@ func newOSVersionSensor(key string, cfg config.SensorConfig) Sensor {
 }
 
 func (s *osVersionSensor) Collect(ctx context.Context) (string, error) {
-	return "test", nil
+	hi, err := host.Info()
+	if err != nil {
+		return "unavailable", err
+	}
+
+	if hi.Platform != "" && hi.PlatformVersion != "" {
+		return fmt.Sprintf("%s %s", hi.Platform, hi.PlatformVersion), nil
+	}
+	if hi.OS != "" && hi.KernelVersion != "" {
+		return fmt.Sprintf("%s %s", hi.OS, hi.KernelVersion), nil
+	}
+
+	if hi.KernelVersion != "" {
+		return hi.KernelVersion, nil
+	}
+
+	return "unavailable", errors.New("empty host info")
 }
