@@ -25,7 +25,7 @@ func newCPUUsageSensor(key string, cfg config.SensorConfig) Sensor {
 func (s *cpuUsageSensor) Collect(ctx context.Context) (string, error) {
 	vals, err := cpu.Percent(0, false)
 	if err != nil {
-		return "", err
+		return "unavailable", err
 	}
 	if len(vals) == 0 {
 		return "0.0", nil
@@ -46,7 +46,7 @@ func newCPULoadSensor(key string, cfg config.SensorConfig) Sensor {
 func (s *cpuLoadSensor) Collect(ctx context.Context) (string, error) {
 	avg, err := load.Avg()
 	if err != nil {
-		return "", err
+		return "unavailable", err
 	}
 	return fmt.Sprintf("%.2f", avg.Load1), nil
 }
@@ -64,10 +64,10 @@ func newCPUTempSensor(key string, cfg config.SensorConfig) Sensor {
 func (s *cpuTempSensor) Collect(ctx context.Context) (string, error) {
 	temps, err := gsensors.SensorsTemperatures()
 	if err != nil {
-		return "", err
+		return "unavailable", err
 	}
 	if len(temps) == 0 {
-		return "", fmt.Errorf("cpu_temp: no temperature sensors")
+		return "unavailable", fmt.Errorf("cpu_temp: no temperature sensors")
 	}
 
 	best := temps[0]

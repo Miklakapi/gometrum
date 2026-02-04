@@ -79,9 +79,6 @@ func (a *agent) collectAndPublishGroup(ctx context.Context, group []sensors.Sens
 		val, err := s.Collect(ctx)
 		if err != nil {
 			slog.Error("collect failed", "sensor", s.Key(), "err", err)
-
-			_ = a.client.Publish(topic, 1, true, []byte("unavailable"))
-			continue
 		}
 
 		if err := a.client.Publish(topic, 1, true, []byte(val)); err != nil {
