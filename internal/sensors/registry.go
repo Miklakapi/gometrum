@@ -78,12 +78,12 @@ var registry = map[string]SensorDefinition{
 	},
 
 	// Network
-	"public_ip": {
+	"host_ip": {
 		DefaultName: "Public IP",
 		DefaultIcon: "mdi:ip",
 		DefaultUnit: "",
 		Factory: func(key string, cfg config.SensorConfig) ([]Sensor, error) {
-			return []Sensor{newPublicIPSensor(key, cfg)}, nil
+			return []Sensor{newHostIPSensor(key, cfg)}, nil
 		},
 	},
 	"wifi_signal": {
