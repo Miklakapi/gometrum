@@ -89,7 +89,7 @@ func (a *agent) collectAndPublishGroup(ctx context.Context, group []sensors.Sens
 		if err := a.client.Publish(topic, 1, true, []byte(val)); err != nil {
 			slog.Error("publish failed", "sensor", s.Key(), "topic", topic, "err", err)
 		} else {
-			slog.Info("published", "sensor", s.Key(), "topic", topic, "value", val)
+			slog.Debug("published", "sensor", s.Key(), "topic", topic, "value", val)
 		}
 	}
 }
