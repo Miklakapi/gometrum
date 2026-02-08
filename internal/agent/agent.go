@@ -2,6 +2,7 @@ package agent
 
 import (
 	"context"
+	"fmt"
 	"log/slog"
 	"net"
 	"strconv"
@@ -127,7 +128,36 @@ func (a *agent) Run(ctx context.Context) error {
 }
 
 func (a *agent) Purge() error {
-	panic("TODO")
+	if err := a.client.Connect(10 * time.Second); err != nil {
+		return err
+	}
+	defer a.client.Close()
+
+	for _, group := range a.groupedSensors {
+		for _, s := range group {
+			topic := fmt.Sprintf("%s/sensor/%s/%s/config", a.discoveryBase, a.deviceId, s.Key())
+			if err := a.client.Publish(topic, 1, true, []byte{}); err != nil {
+				return fmt.Errorf("purge: clear discovery failed (topic=%s): %w", topic, err)
+			}
+		}
+	}
+
+	for _, group := range a.groupedSensors {
+		for _, s := range group {
+			topic := fmt.Sprintf("%s/%s/state", a.stateBase, s.Key())
+			if err := a.client.Publish(topic, 1, true, []byte{}); err != nil {
+				return fmt.Errorf("purge: clear state failed (topic=%s): %w", topic, err)
+			}
+		}
+	}
+
+	if a.availabilityTopic != "" {
+		if err := a.client.Publish(a.availabilityTopic, 1, true, []byte{}); err != nil {
+			slog.Warn("purge: clear availability failed", "topic", a.availabilityTopic, "err", err)
+		}
+	}
+
+	return nil
 }
 
 func groupByInterval(list []sensors.Sensor) map[time.Duration][]sensors.Sensor {

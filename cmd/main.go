@@ -93,6 +93,15 @@ func main() {
 		os.Exit(1)
 	}
 
+	if flags.Purge {
+		if err := a.Purge(); err != nil {
+			slog.Error("purge failed", "err", err)
+			os.Exit(1)
+		}
+		slog.Info("purge completed")
+		return
+	}
+
 	if err = a.Run(appCtx); err != nil {
 		slog.Error("agent stopped with error", "err", err)
 		os.Exit(1)
