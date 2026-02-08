@@ -13,7 +13,6 @@ type CLI struct {
 	Quiet           bool
 	DryRun          bool
 	Validate        bool
-	PrintConfig     bool
 	ServicePath     string
 	GenerateConfig  bool
 	GenerateService bool
@@ -36,8 +35,6 @@ func ParseFlags() (CLI, error) {
 	flag.BoolVar(&cfg.DryRun, "dry-run", false, "Collect metrics but do not publish (print output only)")
 
 	flag.BoolVar(&cfg.Validate, "validate", false, "Validate config and exit")
-
-	flag.BoolVar(&cfg.PrintConfig, "print-config", false, "Print final merged config and exit")
 
 	flag.BoolVar(&cfg.GenerateConfig, "generate-config", false, "Generate example configuration and exit")
 
@@ -71,9 +68,6 @@ func validateFlags(c CLI) error {
 	if c.GenerateConfig {
 		exitModes++
 	}
-	if c.PrintConfig {
-		exitModes++
-	}
 	if c.Validate {
 		exitModes++
 	}
@@ -85,11 +79,11 @@ func validateFlags(c CLI) error {
 	}
 
 	if exitModes > 1 {
-		return errors.New("choose only one of: --generate-config, --print-config, --validate, --purge, --generate-service")
+		return errors.New("choose only one of: --generate-config, --validate, --purge, --generate-service")
 	}
 
 	if exitModes > 0 && (c.Once || c.DryRun) {
-		return errors.New("flags --once and --dry-run cannot be used with --generate-config, --print-config, --validate, --purge, --generate-service")
+		return errors.New("flags --once and --dry-run cannot be used with --generate-config, --validate, --purge, --generate-service")
 	}
 
 	return nil

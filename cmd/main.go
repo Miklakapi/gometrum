@@ -37,13 +37,6 @@ func main() {
 			printErrorAndExit(err, 1)
 		}
 		return
-	case flags.PrintConfig:
-		conf, err := config.LoadString(flags.ConfigPath)
-		if err != nil {
-			printErrorAndExit(err, 1)
-		}
-		fmt.Print(conf)
-		return
 	case flags.GenerateService:
 		if strings.TrimSpace(flags.ServicePath) == "" {
 			fmt.Print(service.ExampleService)

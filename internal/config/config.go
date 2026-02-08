@@ -24,14 +24,6 @@ func SaveExample(path string) error {
 	return os.WriteFile(path, []byte(ExampleYAML), 0644)
 }
 
-func LoadString(path string) (string, error) {
-	data, err := loadBytes(path)
-	if err != nil {
-		return "", err
-	}
-	return string(data), nil
-}
-
 func LoadAndValidate(path string) (Config, error) {
 	cfg, err := LoadConfig(path)
 	if err != nil {
