@@ -15,6 +15,7 @@ type CLI struct {
 	Validate       bool
 	PrintConfig    bool
 	GenerateConfig bool
+	Purge          bool
 }
 
 func ParseFlags() (CLI, error) {
@@ -37,6 +38,8 @@ func ParseFlags() (CLI, error) {
 	flag.BoolVar(&cfg.PrintConfig, "print-config", false, "Print final merged config and exit")
 
 	flag.BoolVar(&cfg.GenerateConfig, "generate-config", false, "Generate example configuration and exit")
+
+	flag.BoolVar(&cfg.Purge, "purge", false, "Purge Home Assistant MQTT discovery entities defined in config (publish empty retained configs) and exit")
 
 	flag.Parse()
 
@@ -68,13 +71,16 @@ func validateFlags(c CLI) error {
 	if c.Validate {
 		exitModes++
 	}
+	if c.Purge {
+		exitModes++
+	}
 
 	if exitModes > 1 {
-		return errors.New("choose only one of: --generate-config, --print-config, --validate")
+		return errors.New("choose only one of: --generate-config, --print-config, --validate, --purge")
 	}
 
 	if exitModes > 0 && (c.Once || c.DryRun) {
-		return errors.New("flags --once and --dry-run cannot be used with --generate-config/--print-config/--validate")
+		return errors.New("flags --once and --dry-run cannot be used with --generate-config/--print-config/--validate/--purge")
 	}
 
 	return nil

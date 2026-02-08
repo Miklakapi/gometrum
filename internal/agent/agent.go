@@ -126,6 +126,10 @@ func (a *agent) Run(ctx context.Context) error {
 	return nil
 }
 
+func (a *agent) Purge() error {
+	panic("TODO")
+}
+
 func groupByInterval(list []sensors.Sensor) map[time.Duration][]sensors.Sensor {
 	groups := make(map[time.Duration][]sensors.Sensor)
 
