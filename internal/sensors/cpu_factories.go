@@ -12,6 +12,44 @@ import (
 	gsensors "github.com/shirou/gopsutil/v4/sensors"
 )
 
+type loadWindow uint8
+
+const (
+	loadWindow1m loadWindow = iota
+	loadWindow5m
+	loadWindow15m
+)
+
+type cpuLoadSensor struct {
+	base
+	window loadWindow
+}
+
+func newCPULoadSensor(key string, cfg config.SensorConfig, window loadWindow) Sensor {
+	return &cpuLoadSensor{
+		base:   base{key: key, name: cfg.Name, interval: cfg.Interval, ha: cfg.HA},
+		window: window,
+	}
+}
+
+func (s *cpuLoadSensor) Collect(ctx context.Context) (string, error) {
+	avg, err := load.AvgWithContext(ctx)
+	if err != nil {
+		return "unavailable", err
+	}
+
+	switch s.window {
+	case loadWindow1m:
+		return fmt.Sprintf("%.2f", avg.Load1), nil
+	case loadWindow5m:
+		return fmt.Sprintf("%.2f", avg.Load5), nil
+	case loadWindow15m:
+		return fmt.Sprintf("%.2f", avg.Load15), nil
+	default:
+		return "unavailable", fmt.Errorf("cpu_load: unknown window")
+	}
+}
+
 type cpuUsageSensor struct {
 	base
 }
@@ -31,24 +69,6 @@ func (s *cpuUsageSensor) Collect(ctx context.Context) (string, error) {
 		return "0.0", nil
 	}
 	return fmt.Sprintf("%.1f", vals[0]), nil
-}
-
-type cpuLoadSensor struct {
-	base
-}
-
-func newCPULoadSensor(key string, cfg config.SensorConfig) Sensor {
-	return &cpuLoadSensor{
-		base: base{key: key, name: cfg.Name, interval: cfg.Interval, ha: cfg.HA},
-	}
-}
-
-func (s *cpuLoadSensor) Collect(ctx context.Context) (string, error) {
-	avg, err := load.Avg()
-	if err != nil {
-		return "unavailable", err
-	}
-	return fmt.Sprintf("%.2f", avg.Load1), nil
 }
 
 type cpuTempSensor struct {

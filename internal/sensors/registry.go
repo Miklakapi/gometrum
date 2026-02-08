@@ -14,12 +14,28 @@ var registry = map[string]SensorDefinition{
 			return []Sensor{newCPUUsageSensor(key, cfg)}, nil
 		},
 	},
-	"cpu_load": {
-		DefaultName: "CPU load",
+	"cpu_load_1m": {
+		DefaultName: "CPU load (1m)",
 		DefaultIcon: "mdi:chart-line",
 		DefaultUnit: "",
 		Factory: func(key string, cfg config.SensorConfig) ([]Sensor, error) {
-			return []Sensor{newCPULoadSensor(key, cfg)}, nil
+			return []Sensor{newCPULoadSensor(key, cfg, loadWindow1m)}, nil
+		},
+	},
+	"cpu_load_5m": {
+		DefaultName: "CPU load (5m)",
+		DefaultIcon: "mdi:chart-line",
+		DefaultUnit: "",
+		Factory: func(key string, cfg config.SensorConfig) ([]Sensor, error) {
+			return []Sensor{newCPULoadSensor(key, cfg, loadWindow5m)}, nil
+		},
+	},
+	"cpu_load_15m": {
+		DefaultName: "CPU load (15m)",
+		DefaultIcon: "mdi:chart-line",
+		DefaultUnit: "",
+		Factory: func(key string, cfg config.SensorConfig) ([]Sensor, error) {
+			return []Sensor{newCPULoadSensor(key, cfg, loadWindow15m)}, nil
 		},
 	},
 	"cpu_temp": {
