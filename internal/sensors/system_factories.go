@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"os"
 
 	"github.com/Miklakapi/gometrum/internal/config"
 	"github.com/shirou/gopsutil/v4/host"
@@ -55,4 +56,25 @@ func (s *osVersionSensor) Collect(ctx context.Context) (string, error) {
 	}
 
 	return "unavailable", errors.New("empty host info")
+}
+
+type hostnameSensor struct {
+	base
+}
+
+func newHostnameSensor(key string, cfg config.SensorConfig) Sensor {
+	return &hostnameSensor{
+		base: base{key: key, name: cfg.Name, interval: cfg.Interval, ha: cfg.HA},
+	}
+}
+
+func (s *hostnameSensor) Collect(ctx context.Context) (string, error) {
+	h, err := os.Hostname()
+	if err != nil {
+		return "unavailable", err
+	}
+	if h == "" {
+		return "unavailable", errors.New("empty hostname")
+	}
+	return h, nil
 }

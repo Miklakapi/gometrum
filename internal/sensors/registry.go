@@ -48,6 +48,14 @@ var registry = map[string]SensorDefinition{
 			return []Sensor{newOSVersionSensor(key, cfg)}, nil
 		},
 	},
+	"hostname": {
+		DefaultName: "Hostname",
+		DefaultIcon: "mdi:server",
+		DefaultUnit: "",
+		Factory: func(key string, cfg config.SensorConfig) ([]Sensor, error) {
+			return []Sensor{newHostnameSensor(key, cfg)}, nil
+		},
+	},
 
 	// Memory
 	"memory_usage": {
