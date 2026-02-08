@@ -7,15 +7,17 @@ import (
 )
 
 type CLI struct {
-	ConfigPath     string
-	Once           bool
-	LogLevel       string
-	Quiet          bool
-	DryRun         bool
-	Validate       bool
-	PrintConfig    bool
-	GenerateConfig bool
-	Purge          bool
+	ConfigPath      string
+	Once            bool
+	LogLevel        string
+	Quiet           bool
+	DryRun          bool
+	Validate        bool
+	PrintConfig     bool
+	ServicePath     string
+	GenerateConfig  bool
+	GenerateService bool
+	Purge           bool
 }
 
 func ParseFlags() (CLI, error) {
@@ -38,6 +40,10 @@ func ParseFlags() (CLI, error) {
 	flag.BoolVar(&cfg.PrintConfig, "print-config", false, "Print final merged config and exit")
 
 	flag.BoolVar(&cfg.GenerateConfig, "generate-config", false, "Generate example configuration and exit")
+
+	flag.StringVar(&cfg.ServicePath, "service-path", "", "Path for generated systemd service file (if empty, prints to stdout)")
+
+	flag.BoolVar(&cfg.GenerateService, "generate-service", false, "Generate example systemd service file and exit (prints to stdout if --service-path is empty)")
 
 	flag.BoolVar(&cfg.Purge, "purge", false, "Purge Home Assistant MQTT discovery entities defined in config (publish empty retained configs) and exit")
 
@@ -74,13 +80,16 @@ func validateFlags(c CLI) error {
 	if c.Purge {
 		exitModes++
 	}
+	if c.GenerateService {
+		exitModes++
+	}
 
 	if exitModes > 1 {
-		return errors.New("choose only one of: --generate-config, --print-config, --validate, --purge")
+		return errors.New("choose only one of: --generate-config, --print-config, --validate, --purge, --generate-service")
 	}
 
 	if exitModes > 0 && (c.Once || c.DryRun) {
-		return errors.New("flags --once and --dry-run cannot be used with --generate-config/--print-config/--validate/--purge")
+		return errors.New("flags --once and --dry-run cannot be used with --generate-config, --print-config, --validate, --purge, --generate-service")
 	}
 
 	return nil

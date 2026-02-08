@@ -6,6 +6,7 @@ import (
 	"log/slog"
 	"os"
 	"os/signal"
+	"strings"
 	"syscall"
 
 	"github.com/Miklakapi/gometrum/internal/agent"
@@ -13,6 +14,7 @@ import (
 	"github.com/Miklakapi/gometrum/internal/config"
 	"github.com/Miklakapi/gometrum/internal/logger"
 	"github.com/Miklakapi/gometrum/internal/sensors"
+	"github.com/Miklakapi/gometrum/internal/service"
 )
 
 func main() {
@@ -41,6 +43,15 @@ func main() {
 			printErrorAndExit(err, 1)
 		}
 		fmt.Print(conf)
+		return
+	case flags.GenerateService:
+		if strings.TrimSpace(flags.ServicePath) == "" {
+			fmt.Print(service.ExampleService)
+			return
+		}
+		if err := service.SaveExample(flags.ServicePath); err != nil {
+			printErrorAndExit(err, 1)
+		}
 		return
 	case flags.Validate:
 		if _, err = config.LoadAndValidate(flags.ConfigPath); err != nil {
