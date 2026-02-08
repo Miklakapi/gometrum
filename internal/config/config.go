@@ -113,27 +113,17 @@ func ValidateConfig(cfg Config) error {
 			return errors.New("config: sensors." + sensorKey + ".interval resolved to 0 (check mqtt.default_interval)")
 		}
 
-		if len(sensorCfg.IncludeMounts) > 0 || len(sensorCfg.ExcludeMounts) > 0 {
-			includeSet := make(map[string]struct{}, len(sensorCfg.IncludeMounts))
+		if len(sensorCfg.IncludeMounts) > 0 {
+			seen := make(map[string]struct{}, len(sensorCfg.IncludeMounts))
+
 			for _, m := range sensorCfg.IncludeMounts {
 				if m == "" {
 					return errors.New("config: sensors." + sensorKey + ".include_mounts contains an empty mount")
 				}
-				includeSet[m] = struct{}{}
-			}
-
-			excludeSet := make(map[string]struct{}, len(sensorCfg.ExcludeMounts))
-			for _, m := range sensorCfg.ExcludeMounts {
-				if m == "" {
-					return errors.New("config: sensors." + sensorKey + ".exclude_mounts contains an empty mount")
+				if _, ok := seen[m]; ok {
+					return errors.New("config: sensors." + sensorKey + ".include_mounts contains duplicate mount: " + m)
 				}
-				excludeSet[m] = struct{}{}
-			}
-
-			for m := range includeSet {
-				if _, ok := excludeSet[m]; ok {
-					return errors.New("config: sensors." + sensorKey + " mount is present in both include_mounts and exclude_mounts: " + m)
-				}
+				seen[m] = struct{}{}
 			}
 		}
 	}
@@ -174,9 +164,6 @@ func normalizeConfig(cfg *Config) {
 
 		for i, m := range sensor.IncludeMounts {
 			sensor.IncludeMounts[i] = strings.TrimSpace(m)
-		}
-		for i, m := range sensor.ExcludeMounts {
-			sensor.ExcludeMounts[i] = strings.TrimSpace(m)
 		}
 
 		if sensor.HA != nil {

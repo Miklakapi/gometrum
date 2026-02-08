@@ -68,9 +68,6 @@ sensors:
     # If omitted, all mount points are included.
     include_mounts: ["/", "/mnt/data"]
 
-    # Exclude specific mount points
-    exclude_mounts: ["/boot", "/snap"]
-
   # GPU usage (if supported by the system)
   gpu_usage:
     name: "GPU usage"

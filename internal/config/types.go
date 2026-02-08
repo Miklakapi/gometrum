@@ -30,7 +30,6 @@ type SensorConfig struct {
 	Name          string          `yaml:"name"`
 	Interval      time.Duration   `yaml:"interval"`
 	IncludeMounts []string        `yaml:"include_mounts,omitempty"`
-	ExcludeMounts []string        `yaml:"exclude_mounts,omitempty"`
 	HA            *HASensorConfig `yaml:"ha,omitempty"`
 }
 
