@@ -4,7 +4,7 @@ SHELL := /usr/bin/bash
 
 GO ?= go
 BIN ?= gometrum
-CMD ?= ./cmd/main.go
+CMD ?= ./cmd/gometrum/main.go
 OUT ?= ./bin/$(BIN)
 
 .PHONY: help run build clean
