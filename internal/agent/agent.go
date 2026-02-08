@@ -112,6 +112,7 @@ func (a *agent) Run(ctx context.Context) error {
 
 			sensorsStateCache := make(map[string]string, len(group))
 
+			a.collectAndPublishGroup(ctx, group, sensorsStateCache)
 			for {
 				select {
 				case <-ticker.C:
