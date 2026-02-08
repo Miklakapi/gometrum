@@ -5,7 +5,7 @@ Wants=network-online.target
 
 [Service]
 Type=simple
-ExecStart=/usr/local/bin/gometrum --config /etc/gometrum.yaml
+ExecStart=/usr/local/bin/gometrum --config /etc/gometrum.yaml --q
 Restart=on-failure
 RestartSec=5s
 
