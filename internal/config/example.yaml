@@ -54,7 +54,7 @@ sensors:
       # Optional Home Assistant overrides
       icon: "mdi:cpu-64-bit"
       unit: "%"
-  
+
   # CPU load average (1 minute)
   cpu_load_1m:
     interval: "30s"
@@ -83,7 +83,7 @@ sensors:
   # RAM usage percentage
   memory_usage:
     interval: "30s"
-  
+
   # Swap usage percentage
   swap_usage:
     interval: "30s"
