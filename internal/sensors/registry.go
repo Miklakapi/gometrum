@@ -103,7 +103,7 @@ var registry = map[string]SensorDefinition{
 
 	// Network
 	"host_ip": {
-		DefaultName: "Public IP",
+		DefaultName: "Host IP",
 		DefaultIcon: "mdi:ip",
 		DefaultUnit: "",
 		Factory: func(key string, cfg config.SensorConfig) ([]Sensor, error) {
@@ -116,6 +116,14 @@ var registry = map[string]SensorDefinition{
 		DefaultUnit: "%",
 		Factory: func(key string, cfg config.SensorConfig) ([]Sensor, error) {
 			return []Sensor{newWiFiSignalSensor(key, cfg)}, nil
+		},
+	},
+	"wifi_ssid": {
+		DefaultName: "Wi-Fi SSID",
+		DefaultIcon: "mdi:wifi",
+		DefaultUnit: "",
+		Factory: func(key string, cfg config.SensorConfig) ([]Sensor, error) {
+			return []Sensor{newWiFiSSIDSensor(key, cfg)}, nil
 		},
 	},
 
