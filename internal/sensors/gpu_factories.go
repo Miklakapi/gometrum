@@ -21,7 +21,7 @@ func newGPUUsageSensor(key string, cfg config.SensorConfig) Sensor {
 func (s *gpuUsageSensor) Collect(ctx context.Context) (string, error) {
 	st, err := nvmlStats()
 	if err != nil {
-		return "unavailable", nil
+		return "unavailable", err
 	}
 	return fmt.Sprintf("%d", st.UtilGPU), nil
 }
@@ -39,7 +39,7 @@ func newGPUMemoryUsageSensor(key string, cfg config.SensorConfig) Sensor {
 func (s *gpuMemoryUsageSensor) Collect(ctx context.Context) (string, error) {
 	st, err := nvmlStats()
 	if err != nil {
-		return "unavailable", nil
+		return "unavailable", err
 	}
 	if st.MemTotal == 0 {
 		return "0", nil
@@ -61,7 +61,7 @@ func newGPUTempSensor(key string, cfg config.SensorConfig) Sensor {
 func (s *gpuTempSensor) Collect(ctx context.Context) (string, error) {
 	st, err := nvmlStats()
 	if err != nil {
-		return "unavailable", nil
+		return "unavailable", err
 	}
 	return fmt.Sprintf("%d", st.TempC), nil
 }
@@ -79,7 +79,7 @@ func newGPUPowerSensor(key string, cfg config.SensorConfig) Sensor {
 func (s *gpuPowerSensor) Collect(ctx context.Context) (string, error) {
 	st, err := nvmlStats()
 	if err != nil {
-		return "unavailable", nil
+		return "unavailable", err
 	}
 	watts := float64(st.PowerMilliW) / 1000.0
 	return fmt.Sprintf("%.1f", watts), nil

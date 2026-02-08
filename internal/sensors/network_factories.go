@@ -88,7 +88,7 @@ func (s *wiFiSSIDSensor) Collect(ctx context.Context) (string, error) {
 	cmd := exec.CommandContext(ctx, "iwgetid", "-r")
 	out, err := cmd.Output()
 	if err != nil {
-		return "unavailable", nil
+		return "unavailable", err
 	}
 
 	ssid := strings.TrimSpace(string(out))
