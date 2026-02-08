@@ -29,7 +29,7 @@ mqtt:
 
   # Default refresh interval for sensors.
   # Used only when a sensor does not define its own interval.
-  default_interval: "1m"
+  default_interval: "30m"
 
 agent:
   # Unique device identifier used by Home Assistant.
@@ -54,24 +54,65 @@ sensors:
       # Optional Home Assistant overrides
       icon: "mdi:cpu-64-bit"
       unit: "%"
+  
+  # CPU load average (1 minute)
+  cpu_load_1m:
+    interval: "30s"
 
+  # CPU load average (5 minutes)
+  cpu_load_5m:
+    interval: "30s"
+
+  # CPU load average (15 minutes)
+  cpu_load_15m:
+    interval: "30s"
+
+  # CPU temperature
+  cpu_temp:
+    interval: "30s"
+
+  # System uptime
+  uptime:
+
+  # Operating system version
+  os_version:
+
+  # Hostname
+  hostname:
+
+  # RAM usage percentage
   memory_usage:
-    name: "RAM usage"
-    interval: "30s"
-
-  # Disk usage per mount point
-  disk_usage:
-    name: "Disk usage"
-    interval: "30s"
-
-    # Only include selected mount points.
-    # If omitted, all mount points are included.
-    include_mounts: ["/", "/mnt/data"]
-
-  # GPU usage (if supported by the system)
-  gpu_usage:
-    name: "GPU usage"
     interval: "30s"
   
+  # Swap usage percentage
+  swap_usage:
+    interval: "30s"
+
+  # Disk usage per mount point (creates one sensor per mount)
+  disk_usage:
+    include_mounts: ["/", "/mnt/data"]
+
+  # Host IP address
+  host_ip:
+
   # Wi-Fi signal strength
-  wifi_signal: {}
+  wifi_signal:
+
+  # Connected Wi-Fi network name (SSID)
+  wifi_ssid:
+
+  # GPU usage percentage
+  gpu_usage:
+    interval: "30s"
+
+  # GPU memory usage percentage
+  gpu_memory_usage:
+    interval: "30s"
+
+  # GPU temperature
+  gpu_temp:
+    interval: "30s"
+
+  # GPU power consumption
+  gpu_power:
+    interval: "30s"
