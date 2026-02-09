@@ -4,18 +4,24 @@ import (
 	"context"
 	"fmt"
 	"log/slog"
+	"net"
 	"os"
 	"os/signal"
+	"strconv"
 	"strings"
 	"syscall"
+	"time"
 
 	"github.com/Miklakapi/gometrum/internal/agent"
 	"github.com/Miklakapi/gometrum/internal/cli"
 	"github.com/Miklakapi/gometrum/internal/config"
 	"github.com/Miklakapi/gometrum/internal/logger"
+	"github.com/Miklakapi/gometrum/internal/mqtt"
 	"github.com/Miklakapi/gometrum/internal/sensors"
 	"github.com/Miklakapi/gometrum/internal/service"
 	"github.com/Miklakapi/gometrum/internal/version"
+
+	MQTT "github.com/eclipse/paho.mqtt.golang"
 )
 
 func main() {
@@ -78,22 +84,44 @@ func main() {
 	}
 
 	s := agent.Settings{
-		Host:            cfg.MQTT.Host,
-		Port:            cfg.MQTT.Port,
-		Username:        cfg.MQTT.Username,
-		Password:        cfg.MQTT.Password,
-		ClientID:        cfg.MQTT.ClientID,
 		DiscoveryPrefix: cfg.MQTT.DiscoveryPrefix,
 		StatePrefix:     cfg.MQTT.StatePrefix,
 		DeviceId:        cfg.Agent.DeviceID,
 		DeviceName:      cfg.Agent.DeviceName,
 		Manufacturer:    cfg.Agent.Manufacturer,
 		Model:           cfg.Agent.Model,
-		DryRun:          flags.DryRun,
 		Once:            flags.Once,
 	}
 
-	a, err := agent.New(s, sens)
+	var pub mqtt.Publisher
+	if flags.DryRun {
+		pub = mqtt.NewDryRun()
+	} else {
+		o := MQTT.NewClientOptions()
+
+		addr := net.JoinHostPort(cfg.MQTT.Host, strconv.Itoa(cfg.MQTT.Port))
+		o.AddBroker("tcp://" + addr)
+
+		o.SetClientID(cfg.MQTT.ClientID)
+		o.SetUsername(cfg.MQTT.Username)
+		o.SetPassword(cfg.MQTT.Password)
+
+		o.SetCleanSession(true)
+		o.SetAutoReconnect(true)
+		o.SetConnectRetry(true)
+
+		o.SetConnectTimeout(10 * time.Second)
+		o.SetKeepAlive(30 * time.Second)
+		o.SetPingTimeout(10 * time.Second)
+
+		availabilityTopic := cfg.MQTT.StatePrefix + "/" + cfg.Agent.DeviceID + "/availability"
+
+		o.SetWill(availabilityTopic, "offline", 1, true)
+
+		pub = mqtt.New(o)
+	}
+
+	a, err := agent.New(s, sens, pub)
 	if err != nil {
 		slog.Error("failed to initialize agent", "err", err)
 		os.Exit(1)

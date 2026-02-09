@@ -71,7 +71,7 @@ func (a *agent) publishDiscovery() error {
 				return fmt.Errorf("discovery marshal failed (sensor=%s): %w", key, err)
 			}
 
-			if err := a.client.Publish(configTopic, 1, true, b); err != nil {
+			if err := a.pub.Publish(configTopic, 1, true, b); err != nil {
 				return fmt.Errorf("discovery publish failed (sensor=%s, topic=%s): %w", key, configTopic, err)
 			}
 		}
@@ -94,7 +94,7 @@ func (a *agent) collectAndPublishGroup(ctx context.Context, group []sensors.Sens
 		}
 		sensorsStateCache[s.Key()] = val
 
-		if err := a.client.Publish(topic, 1, true, []byte(val)); err != nil {
+		if err := a.pub.Publish(topic, 1, true, []byte(val)); err != nil {
 			slog.Error("publish failed", "sensor", s.Key(), "topic", topic, "err", err)
 		} else {
 			slog.Debug("published", "sensor", s.Key(), "topic", topic, "value", val)

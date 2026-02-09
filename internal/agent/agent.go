@@ -4,19 +4,15 @@ import (
 	"context"
 	"fmt"
 	"log/slog"
-	"net"
-	"strconv"
 	"sync"
 	"time"
 
 	"github.com/Miklakapi/gometrum/internal/mqtt"
 	"github.com/Miklakapi/gometrum/internal/sensors"
-
-	MQTT "github.com/eclipse/paho.mqtt.golang"
 )
 
 type agent struct {
-	client *mqtt.MQTTClient
+	pub mqtt.Publisher
 
 	groupedSensors map[time.Duration][]sensors.Sensor
 
@@ -33,11 +29,6 @@ type agent struct {
 }
 
 type Settings struct {
-	Host            string
-	Port            int
-	Username        string
-	Password        string
-	ClientID        string
 	DiscoveryPrefix string
 	StatePrefix     string
 
@@ -46,37 +37,17 @@ type Settings struct {
 	Manufacturer string
 	Model        string
 
-	DryRun bool
-	Once   bool
+	Once bool
 }
 
-func New(s Settings, sens []sensors.Sensor) (*agent, error) {
-	o := MQTT.NewClientOptions()
-	addr := net.JoinHostPort(s.Host, strconv.Itoa(s.Port))
-	o.AddBroker("tcp://" + addr)
-
-	o.SetClientID(s.ClientID)
-	o.SetUsername(s.Username)
-	o.SetPassword(s.Password)
-
-	o.SetCleanSession(true)
-	o.SetAutoReconnect(true)
-	o.SetConnectRetry(true)
-
-	o.SetConnectTimeout(10 * time.Second)
-	o.SetKeepAlive(30 * time.Second)
-	o.SetPingTimeout(10 * time.Second)
-
+func New(s Settings, sens []sensors.Sensor, pub mqtt.Publisher) (*agent, error) {
 	stateBase := s.StatePrefix + "/" + s.DeviceId
 	availabilityTopic := stateBase + "/availability"
 
-	o.SetWill(availabilityTopic, "offline", 1, true)
-
-	client := mqtt.New(o)
-	client.SetAvailability(availabilityTopic, []byte("online"))
+	pub.SetAvailability(availabilityTopic, []byte("online"))
 
 	return &agent{
-		client: client,
+		pub: pub,
 
 		groupedSensors: groupByInterval(sens),
 
@@ -94,16 +65,16 @@ func New(s Settings, sens []sensors.Sensor) (*agent, error) {
 }
 
 func (a *agent) Run(ctx context.Context) error {
-	if err := a.client.Connect(10 * time.Second); err != nil {
+	if err := a.pub.Connect(10 * time.Second); err != nil {
 		return err
 	}
 	defer func() {
 		if a.availabilityTopic != "" {
-			if err := a.client.Publish(a.availabilityTopic, 1, true, []byte("offline")); err != nil {
+			if err := a.pub.Publish(a.availabilityTopic, 1, true, []byte("offline")); err != nil {
 				slog.Warn("mqtt publish offline failed", "topic", a.availabilityTopic, "err", err)
 			}
 		}
-		a.client.Close()
+		a.pub.Close()
 	}()
 
 	if err := a.publishDiscovery(); err != nil {
@@ -144,15 +115,15 @@ func (a *agent) Run(ctx context.Context) error {
 }
 
 func (a *agent) Purge() error {
-	if err := a.client.Connect(10 * time.Second); err != nil {
+	if err := a.pub.Connect(10 * time.Second); err != nil {
 		return err
 	}
-	defer a.client.Close()
+	defer a.pub.Close()
 
 	for _, group := range a.groupedSensors {
 		for _, s := range group {
 			topic := fmt.Sprintf("%s/sensor/%s/%s/config", a.discoveryBase, a.deviceId, s.Key())
-			if err := a.client.Publish(topic, 1, true, []byte{}); err != nil {
+			if err := a.pub.Publish(topic, 1, true, []byte{}); err != nil {
 				return fmt.Errorf("purge: clear discovery failed (topic=%s): %w", topic, err)
 			}
 		}
@@ -161,14 +132,14 @@ func (a *agent) Purge() error {
 	for _, group := range a.groupedSensors {
 		for _, s := range group {
 			topic := fmt.Sprintf("%s/%s/state", a.stateBase, s.Key())
-			if err := a.client.Publish(topic, 1, true, []byte{}); err != nil {
+			if err := a.pub.Publish(topic, 1, true, []byte{}); err != nil {
 				return fmt.Errorf("purge: clear state failed (topic=%s): %w", topic, err)
 			}
 		}
 	}
 
 	if a.availabilityTopic != "" {
-		if err := a.client.Publish(a.availabilityTopic, 1, true, []byte{}); err != nil {
+		if err := a.pub.Publish(a.availabilityTopic, 1, true, []byte{}); err != nil {
 			slog.Warn("purge: clear availability failed", "topic", a.availabilityTopic, "err", err)
 		}
 	}
