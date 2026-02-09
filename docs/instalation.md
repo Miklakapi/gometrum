@@ -52,3 +52,33 @@ Verify:
 which gometrum
 sudo gometrum --help
 ```
+
+## Updating
+
+Updating GoMetrum replaces only the binary. The configuration file is not modified.
+
+### Update to the latest version
+
+Re-run `go install` with the `@latest` version tag:
+
+```bash
+go install github.com/Miklakapi/gometrum/cmd/gometrum@latest
+```
+
+This downloads, builds, and installs the newest released version into the Go binary directory ($(go env GOPATH)/bin).
+
+Verify the updated binary:
+
+```bash
+gometrum --help
+```
+
+### Install a specific version
+
+To install a specific version:
+
+```bash
+go install github.com/Miklakapi/gometrum/cmd/gometrum@v1.0.2
+```
+
+This is useful for reproducible setups or rollbacks.
