@@ -161,6 +161,8 @@ func normalizeConfig(cfg *Config) {
 		if sensor.HA != nil {
 			sensor.HA.Icon = strings.TrimSpace(sensor.HA.Icon)
 			sensor.HA.Unit = strings.TrimSpace(sensor.HA.Unit)
+			sensor.HA.DeviceClass = strings.TrimSpace(sensor.HA.DeviceClass)
+			sensor.HA.StateClass = strings.TrimSpace(sensor.HA.StateClass)
 		}
 
 		normalized[sensorKey] = sensor

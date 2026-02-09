@@ -34,6 +34,8 @@ type SensorConfig struct {
 }
 
 type HASensorConfig struct {
-	Icon string `yaml:"icon,omitempty"`
-	Unit string `yaml:"unit,omitempty"`
+	Icon        string `yaml:"icon,omitempty"`
+	Unit        string `yaml:"unit,omitempty"`
+	DeviceClass string `yaml:"device_class,omitempty"`
+	StateClass  string `yaml:"state_class,omitempty"`
 }

@@ -16,6 +16,8 @@ type haSensorDiscovery struct {
 	AvailabilityTopic string    `json:"availability_topic,omitempty"`
 	Icon              string    `json:"icon,omitempty"`
 	Unit              string    `json:"unit_of_measurement,omitempty"`
+	DeviceClass       string    `json:"device_class,omitempty"`
+	StateClass        string    `json:"state_class,omitempty"`
 	Device            *haDevice `json:"device,omitempty"`
 }
 
@@ -55,6 +57,12 @@ func (a *agent) publishDiscovery() error {
 				}
 				if ha.Unit != "" {
 					payload.Unit = ha.Unit
+				}
+				if ha.DeviceClass != "" {
+					payload.DeviceClass = ha.DeviceClass
+				}
+				if ha.StateClass != "" {
+					payload.StateClass = ha.StateClass
 				}
 			}
 

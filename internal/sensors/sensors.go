@@ -30,10 +30,12 @@ func (b base) Interval() time.Duration    { return b.interval }
 func (b base) HA() *config.HASensorConfig { return b.ha }
 
 type SensorDefinition struct {
-	DefaultName string
-	DefaultIcon string
-	DefaultUnit string
-	Factory     func(key string, cfg config.SensorConfig) ([]Sensor, error)
+	DefaultName        string
+	DefaultIcon        string
+	DefaultUnit        string
+	DefaultDeviceClass string
+	DefaultStateClass  string
+	Factory            func(key string, cfg config.SensorConfig) ([]Sensor, error)
 }
 
 func Prepare(cfg *config.Config) error {
@@ -70,6 +72,12 @@ func Normalize(cfg *config.Config) error {
 			}
 			if sensorCfg.HA.Unit == "" && def.DefaultUnit != "" {
 				sensorCfg.HA.Unit = def.DefaultUnit
+			}
+			if sensorCfg.HA.DeviceClass == "" && def.DefaultDeviceClass != "" {
+				sensorCfg.HA.DeviceClass = def.DefaultDeviceClass
+			}
+			if sensorCfg.HA.StateClass == "" && def.DefaultStateClass != "" {
+				sensorCfg.HA.StateClass = def.DefaultStateClass
 			}
 		}
 
