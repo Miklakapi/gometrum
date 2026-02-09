@@ -17,6 +17,7 @@ type CLI struct {
 	GenerateConfig  bool
 	GenerateService bool
 	Purge           bool
+	Version         bool
 }
 
 func ParseFlags() (CLI, error) {
@@ -43,6 +44,9 @@ func ParseFlags() (CLI, error) {
 	flag.BoolVar(&cfg.GenerateService, "generate-service", false, "Generate example systemd service file and exit (prints to stdout if --service-path is empty)")
 
 	flag.BoolVar(&cfg.Purge, "purge", false, "Purge Home Assistant MQTT discovery entities defined in config (publish empty retained configs) and exit")
+
+	flag.BoolVar(&cfg.Version, "version", false, "Show version and exit")
+	flag.BoolVar(&cfg.Version, "v", false, "Shorthand for --version")
 
 	flag.Parse()
 
@@ -77,13 +81,16 @@ func validateFlags(c CLI) error {
 	if c.GenerateService {
 		exitModes++
 	}
+	if c.Version {
+		exitModes++
+	}
 
 	if exitModes > 1 {
-		return errors.New("choose only one of: --generate-config, --validate, --purge, --generate-service")
+		return errors.New("choose only one of: --generate-config, --validate, --purge, --generate-service, --version,")
 	}
 
 	if exitModes > 0 && (c.Once || c.DryRun) {
-		return errors.New("flags --once and --dry-run cannot be used with --generate-config, --validate, --purge, --generate-service")
+		return errors.New("flags --once and --dry-run cannot be used with --generate-config, --validate, --purge, --generate-service, --version,")
 	}
 
 	return nil

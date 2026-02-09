@@ -15,6 +15,7 @@ import (
 	"github.com/Miklakapi/gometrum/internal/logger"
 	"github.com/Miklakapi/gometrum/internal/sensors"
 	"github.com/Miklakapi/gometrum/internal/service"
+	"github.com/Miklakapi/gometrum/internal/version"
 )
 
 func main() {
@@ -50,6 +51,9 @@ func main() {
 		if _, err = config.LoadAndValidate(flags.ConfigPath); err != nil {
 			printErrorAndExit(err, 1)
 		}
+		return
+	case flags.Version:
+		fmt.Println(version.VersionString())
 		return
 	}
 
