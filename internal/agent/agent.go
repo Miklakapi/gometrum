@@ -28,6 +28,8 @@ type agent struct {
 	deviceName   string
 	manufacturer string
 	model        string
+
+	once bool
 }
 
 type Settings struct {
@@ -43,6 +45,9 @@ type Settings struct {
 	DeviceName   string
 	Manufacturer string
 	Model        string
+
+	DryRun bool
+	Once   bool
 }
 
 func New(s Settings, sens []sensors.Sensor) (*agent, error) {
@@ -83,6 +88,8 @@ func New(s Settings, sens []sensors.Sensor) (*agent, error) {
 		deviceName:   s.DeviceName,
 		manufacturer: s.Manufacturer,
 		model:        s.Model,
+
+		once: s.Once,
 	}, nil
 }
 
@@ -101,6 +108,14 @@ func (a *agent) Run(ctx context.Context) error {
 
 	if err := a.publishDiscovery(); err != nil {
 		return err
+	}
+
+	if a.once {
+		for _, group := range a.groupedSensors {
+			sensorsStateCache := make(map[string]string, len(group))
+			a.collectAndPublishGroup(ctx, group, sensorsStateCache)
+		}
+		return nil
 	}
 
 	var wg sync.WaitGroup

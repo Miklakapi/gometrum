@@ -89,6 +89,8 @@ func main() {
 		DeviceName:      cfg.Agent.DeviceName,
 		Manufacturer:    cfg.Agent.Manufacturer,
 		Model:           cfg.Agent.Model,
+		DryRun:          flags.DryRun,
+		Once:            flags.Once,
 	}
 
 	a, err := agent.New(s, sens)
