@@ -96,7 +96,9 @@ gometrum --once --config gometrum.yaml
 
 Collect metrics but do not publish them to MQTT.
 
-Collected values are printed to stdout.
+Instead of publishing, all MQTT messages(discovery, state, availability) are printed to stdout.
+
+This flag can be combined with `--once`.
 
 ```bash
 gometrum --dry-run --config gometrum.yaml
@@ -184,6 +186,8 @@ gometrum --version
     - --generate-service
     - --version
 
-- Flags `--once` and `--dry-run` are mutually exclusive with each other.
+- Flags `--once` and `--dry-run` can be used together.
+- When combined, GoMetrum collects metrics once, prints all MQTT messages
+  to stdout, and exits.
 
 Invalid flag combinations result in an error.
