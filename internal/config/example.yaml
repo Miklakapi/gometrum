@@ -54,6 +54,8 @@ sensors:
       # Optional Home Assistant overrides
       icon: "mdi:cpu-64-bit"
       unit: "%"
+      device_class: ""
+      state_class: "measurement"
 
   # CPU load average (1 minute)
   cpu_load_1m:
