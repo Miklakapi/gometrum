@@ -12,9 +12,9 @@ A lightweight system metrics agent written in Go.
 
 The project focuses on **explicit configuration**, **deterministic behavior**, and **low runtime overhead**, while avoiding implicit defaults and hidden logic.
 
-<div style="text-align: center">
+<p align="center">
     <img src="docs/images/sensors.png">
-</div>
+</p>
 
 ## Documentation
 
