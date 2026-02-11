@@ -77,3 +77,11 @@ Project is created with:
 ## Status
 
 The project is in active development.
+
+## Roadmap
+
+Planned improvements and upcoming features:
+
+- Structured logging sinks (UDP and HTTP with multiple codecs)
+- Home Assistant button entities (in addition to sensors)
+- Additional sensor types and hardware integrations
