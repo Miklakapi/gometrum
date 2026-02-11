@@ -6,6 +6,25 @@
 # - Each sensor defines its own refresh interval.
 # - Intervals use Go duration format: "5s", "30s", "1m", "5m".
 
+log:
+  level: info
+
+  # sinks:
+  #   - type: udp
+  #     name: "UDP sink"
+  #     addr: 127.0.0.1:8222
+  #     level: warn
+
+  #   - type: http
+  #     name: "HTTP sink"
+  #     url: http://127.0.0.1:8111/api/v1/push
+  #     level: warn
+  #     codec: event_json # text | loki | ndjson
+  #     method: POST
+  #     timeout: 2s
+  #     headers:
+  #       Authorization: "Bearer ${LOG_API_TOKEN}"
+
 mqtt:
   # MQTT broker address
   host: localhost

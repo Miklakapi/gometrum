@@ -4,6 +4,7 @@ GoMetrum uses a **single explicit YAML configuration file**.
 
 The configuration file fully defines:
 
+- logging behavior,
 - which sensors exist,
 - how often they are collected,
 - how data is published to Home Assistant.
@@ -15,6 +16,7 @@ No sensors are created unless explicitly defined.
 GoMetrum follows an **explicit configuration model**:
 
 - sensors are enabled by presence,
+- logging is fully defined in configuration,
 - there are no global enable/disable switches,
 - startup behavior is deterministic.
 
@@ -42,9 +44,68 @@ with inline comments.
 
 At a high level, the configuration file consists of four sections:
 
+- `log` - logging configuration
 - `mqtt` - MQTT connection and discovery settings
 - `agent` - device metadata used by Home Assistant
 - `sensors` - sensor definitions and collection intervals
+
+## Log section
+
+The `log` section defines how GoMetrum logs information and where logs are sent.
+
+### Log level
+
+`log.level` defines the global minimum log level.
+
+Supported values: `debug`, `info`, `warn`, `error`.
+
+If not specified, defaults to `info`.
+
+### Log sinks
+
+Sinks define additional destinations for logs.
+
+Console logging is always enabled.
+
+Each sink has the following common fields:
+
+- `name` - human-readable sink identifier (used for diagnostics and internal logging)
+- `type` - sink type (`udp` or `http`)
+- `level` - minimum log level for this sink (inherits from `log.level` if not specified)
+
+#### UDP sink
+
+UDP sends logs as plain text (syslog-like format).
+
+Properties:
+
+- `name` - descriptive identifier of the sink
+- `addr` - destination in `host:port` format
+- `level` - minimum level for this sink (optional, inherits from global level)
+
+UDP logs are sent as plain text messages.<br>
+No authentication or TLS is supported for UDP.
+
+#### HTTP sink
+
+HTTP sends logs to a REST endpoint.
+
+Properties:
+
+- `name` - descriptive identifier of the sink
+- `url` - target endpoint (`http` or `https`)
+- `method` - HTTP method (default: `POST`)
+- `timeout` - request timeout
+- `headers` - optional HTTP headers
+- `level` - minimum level for this sink (optional, inherits from global level)
+- `codec` - payload format
+
+Supported HTTP codecs:
+
+- `event_json` – single structured JSON event per request
+- `text` – plain text log line
+- `ndjson` – newline-delimited JSON (multiple events per request)
+- `loki` – Grafana Loki push API format
 
 ## MQTT section
 
@@ -72,17 +133,74 @@ Important fields:
 
 ## Sensors section
 
-The sensors section defines which system metrics are collected.
+The `sensors` section defines which system metrics are collected.
 
 Each sensor:
 
 - exists only if present in the configuration,
+- is identified by its key (e.g. cpu_usage, memory_usage),
 - may define its own `interval`,
 - may provide Home Assistant overrides under the `ha` key.
 
-Some sensors support additional options (e.g. `include_mounts` for disk usage).
+### Sensor activation model
 
-Multiple sensors can share the same refresh interval internally.
+Sensors are enabled strictly by presence.<br>
+There are no global enable/disable switches.
+
+- Commenting out a sensor disables it.
+- Removing a sensor removes the corresponding Home Assistant entity.
+- Startup behavior is deterministic.
+
+`interval`
+
+Each sensor may define an `interval` using Go duration format (e.g. `5s`, `30s`, `1m`, `5m`).
+
+If a sensor does not define its own interval, it inherits `mqtt.default_interval`.
+
+Intervals must be greater than zero.
+
+Internally, sensors sharing the same interval are grouped
+for efficient scheduling.
+
+`name`
+
+A sensor may optionally define a human-readable `name`.
+
+If not provided, a default name is used.
+
+`ha` **(Home Assistant overrides)**
+
+The optional `ha` block allows overriding Home Assistant entity metadata.
+
+Supported override fields include:
+
+- `icon`
+- `unit`
+- `device_class`
+- `state_class`
+
+If not specified, sensible defaults are applied where applicable.
+
+### Sensor-specific options
+
+Some sensors expose additional configuration fields.
+
+Example:
+
+- `include_mounts` (for disk usage sensors)
+
+Additional options are validated per sensor type.
+
+### Validation rules
+
+Configuration validation ensures:
+
+- interval values are valid durations,
+- sensor keys are recognized,
+- required options (if any) are provided,
+- sensor-specific constraints are respected.
+
+Hardware availability is not validated at configuration time.
 
 ## Validate configuration
 

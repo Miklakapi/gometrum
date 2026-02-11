@@ -3,9 +3,31 @@ package config
 import "time"
 
 type Config struct {
+	Log     LogConfig               `yaml:"log"`
 	MQTT    MQTTConfig              `yaml:"mqtt"`
 	Agent   AgentConfig             `yaml:"agent"`
 	Sensors map[string]SensorConfig `yaml:"sensors"`
+}
+
+type LogConfig struct {
+	Level string    `yaml:"level"`
+	Sinks []LogSink `yaml:"sinks"`
+}
+
+type LogSink struct {
+	Type string `yaml:"type"`
+	Name string `yaml:"name"`
+
+	Level string `yaml:"level"`
+
+	Addr string `yaml:"addr"`
+
+	URL     string            `yaml:"url"`
+	Method  string            `yaml:"method"`
+	Timeout time.Duration     `yaml:"timeout"`
+	Headers map[string]string `yaml:"headers"`
+
+	Codec string `yaml:"codec"`
 }
 
 type MQTTConfig struct {

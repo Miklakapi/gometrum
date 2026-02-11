@@ -9,8 +9,6 @@ import (
 type CLI struct {
 	ConfigPath      string
 	Once            bool
-	LogLevel        string
-	Quiet           bool
 	DryRun          bool
 	Validate        bool
 	ServicePath     string
@@ -27,11 +25,6 @@ func ParseFlags() (CLI, error) {
 	flag.StringVar(&cfg.ConfigPath, "c", "", "Shorthand for --config")
 
 	flag.BoolVar(&cfg.Once, "once", false, "Collect and publish once, then exit")
-
-	flag.StringVar(&cfg.LogLevel, "log-level", "info", "Log level: debug, info, warn, error")
-
-	flag.BoolVar(&cfg.Quiet, "quiet", false, "Suppress all logs except errors")
-	flag.BoolVar(&cfg.Quiet, "q", false, "Shorthand for --quiet")
 
 	flag.BoolVar(&cfg.DryRun, "dry-run", false, "Collect metrics but do not publish (print output only)")
 
@@ -52,12 +45,6 @@ func ParseFlags() (CLI, error) {
 
 	if strings.TrimSpace(cfg.ConfigPath) == "" && !cfg.GenerateConfig {
 		cfg.ConfigPath = "./gometrum.yaml"
-	}
-
-	if cfg.Quiet {
-		cfg.LogLevel = "error"
-	} else if strings.TrimSpace(cfg.LogLevel) == "" {
-		cfg.LogLevel = "info"
 	}
 
 	if err := validateFlags(cfg); err != nil {

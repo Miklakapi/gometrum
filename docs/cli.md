@@ -21,43 +21,6 @@ Example:
 gometrum --config /etc/gometrum.yaml
 ```
 
----
-
-### `--log-level`
-
-Controls log verbosity.
-
-Supported values:
-
-- `debug`
-- `info` (default)
-- `warn`
-- `error`
-
-Example:
-
-```bash
-gometrum --log-level debug
-```
-
----
-
-### `--quiet`, `-q`
-
-Suppress all logs except errors.
-
-Equivalent to:
-
-```bash
---log-level error
-```
-
-Example:
-
-```bash
-gometrum --config /etc/gometrum.yaml
-```
-
 ## Agent execution modes
 
 ### Normal mode (default)

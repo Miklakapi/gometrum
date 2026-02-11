@@ -2,7 +2,6 @@ package config
 
 import (
 	_ "embed"
-	"errors"
 	"os"
 	"path/filepath"
 	"strings"
@@ -55,69 +54,22 @@ func LoadConfig(path string) (Config, error) {
 }
 
 func ValidateConfig(cfg Config) error {
-	if cfg.MQTT.Host == "" {
-		return errors.New("config: mqtt.host is required")
-	}
-	if cfg.MQTT.Port <= 0 || cfg.MQTT.Port > 65535 {
-		return errors.New("config: mqtt.port must be a valid TCP port (1-65535)")
-	}
-	if cfg.MQTT.Username != "" && cfg.MQTT.Password == "" {
-		return errors.New("config: mqtt.password is required when mqtt.username is set")
-	}
-	if cfg.MQTT.Password != "" && cfg.MQTT.Username == "" {
-		return errors.New("config: mqtt.username is required when mqtt.password is set")
-	}
-	if cfg.MQTT.ClientID == "" {
-		return errors.New("config: mqtt.client_id is required (must be unique per device)")
-	}
-	if cfg.MQTT.DiscoveryPrefix == "" {
-		return errors.New("config: mqtt.discovery_prefix cannot be empty")
-	}
-	if cfg.MQTT.StatePrefix == "" {
-		return errors.New("config: mqtt.state_prefix cannot be empty")
-	}
-	if cfg.MQTT.DefaultInterval <= 0 {
-		return errors.New("config: mqtt.default_interval must be > 0 (e.g. \"30s\")")
+	var err error
+
+	if err = validateLogLevel(cfg.Log); err != nil {
+		return err
 	}
 
-	if cfg.Agent.DeviceID == "" {
-		return errors.New("config: agent.device_id is required (must be unique per device)")
-	}
-	if cfg.Agent.DeviceName == "" {
-		return errors.New("config: agent.device_name cannot be empty")
-	}
-	if cfg.Agent.Manufacturer == "" {
-		return errors.New("config: agent.manufacturer cannot be empty")
-	}
-	if cfg.Agent.Model == "" {
-		return errors.New("config: agent.model cannot be empty")
+	if err = validateMQTT(cfg.MQTT); err != nil {
+		return err
 	}
 
-	if len(cfg.Sensors) == 0 {
-		return errors.New("config: sensors section must not be empty (define at least one sensor)")
+	if err = validateAgent(cfg.Agent); err != nil {
+		return err
 	}
 
-	for sensorKey, sensorCfg := range cfg.Sensors {
-		if sensorKey == "" {
-			return errors.New("config: sensors contains an empty key")
-		}
-		if sensorCfg.Interval <= 0 {
-			return errors.New("config: sensors." + sensorKey + ".interval resolved to 0 (check mqtt.default_interval)")
-		}
-
-		if len(sensorCfg.IncludeMounts) > 0 {
-			seen := make(map[string]struct{}, len(sensorCfg.IncludeMounts))
-
-			for _, m := range sensorCfg.IncludeMounts {
-				if m == "" {
-					return errors.New("config: sensors." + sensorKey + ".include_mounts contains an empty mount")
-				}
-				if _, ok := seen[m]; ok {
-					return errors.New("config: sensors." + sensorKey + ".include_mounts contains duplicate mount: " + m)
-				}
-				seen[m] = struct{}{}
-			}
-		}
+	if err = validateSensors(cfg.Sensors); err != nil {
+		return err
 	}
 
 	return nil
@@ -132,6 +84,32 @@ func loadBytes(path string) ([]byte, error) {
 }
 
 func normalizeConfig(cfg *Config) {
+	cfg.Log.Level = strings.ToLower(strings.TrimSpace(cfg.Log.Level))
+	for i := range cfg.Log.Sinks {
+		cfg.Log.Sinks[i].Type = strings.ToLower(strings.TrimSpace(cfg.Log.Sinks[i].Type))
+		cfg.Log.Sinks[i].Name = strings.TrimSpace(cfg.Log.Sinks[i].Name)
+		cfg.Log.Sinks[i].Level = strings.ToLower(strings.TrimSpace(cfg.Log.Sinks[i].Level))
+
+		cfg.Log.Sinks[i].Addr = strings.TrimSpace(cfg.Log.Sinks[i].Addr)
+
+		cfg.Log.Sinks[i].URL = strings.TrimSpace(cfg.Log.Sinks[i].URL)
+		cfg.Log.Sinks[i].Method = strings.ToUpper(strings.TrimSpace(cfg.Log.Sinks[i].Method))
+		cfg.Log.Sinks[i].Codec = strings.ToLower(strings.TrimSpace(cfg.Log.Sinks[i].Codec))
+
+		if cfg.Log.Sinks[i].Headers != nil {
+			normalized := make(map[string]string, len(cfg.Log.Sinks[i].Headers))
+			for k, v := range cfg.Log.Sinks[i].Headers {
+				key := strings.TrimSpace(k)
+				val := strings.TrimSpace(v)
+				if key == "" {
+					continue
+				}
+				normalized[key] = val
+			}
+			cfg.Log.Sinks[i].Headers = normalized
+		}
+	}
+
 	cfg.MQTT.Host = strings.TrimSpace(cfg.MQTT.Host)
 	cfg.MQTT.Username = strings.TrimSpace(cfg.MQTT.Username)
 	cfg.MQTT.Password = strings.TrimSpace(cfg.MQTT.Password)
@@ -144,8 +122,7 @@ func normalizeConfig(cfg *Config) {
 	cfg.Agent.Manufacturer = strings.TrimSpace(cfg.Agent.Manufacturer)
 	cfg.Agent.Model = strings.TrimSpace(cfg.Agent.Model)
 
-	normalized := make(map[string]SensorConfig, len(cfg.Sensors))
-
+	normalizedSensors := make(map[string]SensorConfig, len(cfg.Sensors))
 	for key, sensor := range cfg.Sensors {
 		sensorKey := strings.TrimSpace(key)
 		if sensorKey == "" {
@@ -165,13 +142,38 @@ func normalizeConfig(cfg *Config) {
 			sensor.HA.StateClass = strings.TrimSpace(sensor.HA.StateClass)
 		}
 
-		normalized[sensorKey] = sensor
+		normalizedSensors[sensorKey] = sensor
 	}
 
-	cfg.Sensors = normalized
+	cfg.Sensors = normalizedSensors
 }
 
 func applyDefaults(cfg *Config) {
+	if cfg.Log.Level == "" {
+		cfg.Log.Level = "info"
+	}
+
+	for i := range cfg.Log.Sinks {
+		if cfg.Log.Sinks[i].Level == "" {
+			cfg.Log.Sinks[i].Level = cfg.Log.Level
+		}
+
+		if cfg.Log.Sinks[i].Type == "http" {
+			if cfg.Log.Sinks[i].Method == "" {
+				cfg.Log.Sinks[i].Method = "POST"
+			}
+			if cfg.Log.Sinks[i].Timeout <= 0 {
+				cfg.Log.Sinks[i].Timeout = 2 * time.Second
+			}
+			if cfg.Log.Sinks[i].Codec == "" {
+				cfg.Log.Sinks[i].Codec = "event_json"
+			}
+			if cfg.Log.Sinks[i].Headers == nil {
+				cfg.Log.Sinks[i].Headers = map[string]string{}
+			}
+		}
+	}
+
 	if cfg.MQTT.Port == 0 {
 		cfg.MQTT.Port = 1883
 	}

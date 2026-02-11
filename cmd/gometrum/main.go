@@ -25,6 +25,8 @@ import (
 )
 
 func main() {
+	logger.SetupLogger("warn")
+
 	appCtx, stop := signal.NotifyContext(context.Background(), os.Interrupt, syscall.SIGTERM)
 	defer stop()
 
@@ -63,13 +65,13 @@ func main() {
 		return
 	}
 
-	logger.SetupLogger(flags.LogLevel)
-
 	cfg, err := config.LoadAndValidate(flags.ConfigPath)
 	if err != nil {
 		slog.Error("failed to load configuration", "err", err)
 		os.Exit(1)
 	}
+
+	logger.SetupLogger(cfg.Log.Level)
 
 	err = sensors.Prepare(&cfg)
 	if err != nil {
