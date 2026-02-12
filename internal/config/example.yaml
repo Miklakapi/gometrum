@@ -7,23 +7,59 @@
 # - Intervals use Go duration format: "5s", "30s", "1m", "5m".
 
 log:
+  # Global minimum log level for console output and as a default for sinks.
+  # Supported: debug, info, warn, error
   level: info
 
-  # sinks:
-  #   - type: udp
-  #     name: "UDP sink"
-  #     addr: 127.0.0.1:8222
-  #     level: warn
+  # Optional sinks. Console logging is always enabled.
+  sinks:
+    - type: udp
+      name: "UDP sink"
+      addr: 127.0.0.1:8222
 
-  #   - type: http
-  #     name: "HTTP sink"
-  #     url: http://127.0.0.1:8111/api/v1/push
-  #     level: warn
-  #     codec: event_json # text | loki | ndjson
-  #     method: POST
-  #     timeout: 2s
-  #     headers:
-  #       Authorization: "Bearer ${LOG_API_TOKEN}"
+      # Per-sink minimum log level (inherits from log.level if omitted)
+      level: warn
+
+      # Optional queue size (bounded). When full, the oldest entries are dropped.
+      # Keep it small to minimize memory usage.
+      queue_size: 50
+
+    - type: http
+      name: "HTTP sink"
+      url: http://127.0.0.1:8111/api/v1/push
+
+      # Per-sink minimum log level (inherits from log.level if omitted)
+      level: warn
+
+      # Payload format:
+      # - event_json: one JSON object per request
+      # - text: plain text per request
+      # - ndjson: batches as newline-delimited JSON (recommended for batching)
+      # - loki: batches in Grafana Loki push API format
+      codec: ndjson
+
+      # HTTP request settings
+      method: POST
+      timeout: 2s
+
+      # Optional HTTP headers
+      headers:
+        Authorization: "Bearer LOG_API_TOKEN"
+
+      # Optional queue size (bounded). When full, the oldest entries are dropped.
+      queue_size: 50
+
+      # Optional batching configuration.
+      # Used only for codecs that support batching (ndjson, loki).
+      # Ignored for event_json and text.
+      batch:
+        # Maximum number of log events per request.
+        # Defaults to 20 if omitted.
+        max_items: 20
+
+        # Maximum time to wait before flushing a partially filled batch.
+        # Defaults to 1s if omitted.
+        max_wait: 1s
 
 mqtt:
   # MQTT broker address

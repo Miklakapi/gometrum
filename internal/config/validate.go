@@ -31,6 +31,10 @@ func validateLogLevel(lc LogConfig) error {
 			return fmt.Errorf("%s.level must be one of: debug, info, warn, error (got: %s)", path, sink.Level)
 		}
 
+		if sink.QueueSize < 1 {
+			return fmt.Errorf("%s.queue_size must be >= 1 (got: %d)", path, sink.QueueSize)
+		}
+
 		switch sink.Type {
 		case "udp":
 			if sink.Addr == "" {
@@ -41,6 +45,9 @@ func validateLogLevel(lc LogConfig) error {
 			}
 			if sink.Codec != "" {
 				return errors.New(path + ".codec is not supported for type=udp (udp is text/syslog-like only)")
+			}
+			if sink.Batch != nil {
+				return errors.New(path + ".batch is not supported for type=udp")
 			}
 			if sink.URL != "" || sink.Method != "" || sink.Timeout != 0 || len(sink.Headers) > 0 {
 				return errors.New(path + " contains http-only fields but type=udp")
@@ -74,6 +81,18 @@ func validateLogLevel(lc LogConfig) error {
 
 			if sink.Addr != "" {
 				return errors.New(path + ".addr is not supported for type=http")
+			}
+
+			if sink.Batch != nil {
+				if sink.Codec != "ndjson" && sink.Codec != "loki" {
+					return fmt.Errorf("%s.batch is only supported for codec=ndjson or codec=loki (got: %s)", path, sink.Codec)
+				}
+				if sink.Batch.MaxItems < 1 {
+					return fmt.Errorf("%s.batch.max_items must be >= 1 (got: %d)", path, sink.Batch.MaxItems)
+				}
+				if sink.Batch.MaxWait <= 0 {
+					return fmt.Errorf("%s.batch.max_wait must be > 0 (got: %s)", path, sink.Batch.MaxWait)
+				}
 			}
 
 		default:

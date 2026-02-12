@@ -28,6 +28,14 @@ type LogSink struct {
 	Headers map[string]string `yaml:"headers"`
 
 	Codec string `yaml:"codec"`
+
+	QueueSize int             `yaml:"queue_size"`
+	Batch     *LogBatchConfig `yaml:"batch,omitempty"`
+}
+
+type LogBatchConfig struct {
+	MaxItems int           `yaml:"max_items"`
+	MaxWait  time.Duration `yaml:"max_wait"`
 }
 
 type MQTTConfig struct {

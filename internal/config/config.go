@@ -85,6 +85,7 @@ func loadBytes(path string) ([]byte, error) {
 
 func normalizeConfig(cfg *Config) {
 	cfg.Log.Level = strings.ToLower(strings.TrimSpace(cfg.Log.Level))
+
 	for i := range cfg.Log.Sinks {
 		cfg.Log.Sinks[i].Type = strings.ToLower(strings.TrimSpace(cfg.Log.Sinks[i].Type))
 		cfg.Log.Sinks[i].Name = strings.TrimSpace(cfg.Log.Sinks[i].Name)
@@ -158,6 +159,10 @@ func applyDefaults(cfg *Config) {
 			cfg.Log.Sinks[i].Level = cfg.Log.Level
 		}
 
+		if cfg.Log.Sinks[i].QueueSize <= 0 {
+			cfg.Log.Sinks[i].QueueSize = 50
+		}
+
 		if cfg.Log.Sinks[i].Type == "http" {
 			if cfg.Log.Sinks[i].Method == "" {
 				cfg.Log.Sinks[i].Method = "POST"
@@ -166,10 +171,22 @@ func applyDefaults(cfg *Config) {
 				cfg.Log.Sinks[i].Timeout = 2 * time.Second
 			}
 			if cfg.Log.Sinks[i].Codec == "" {
-				cfg.Log.Sinks[i].Codec = "event_json"
+				cfg.Log.Sinks[i].Codec = "ndjson"
 			}
 			if cfg.Log.Sinks[i].Headers == nil {
 				cfg.Log.Sinks[i].Headers = map[string]string{}
+			}
+
+			if cfg.Log.Sinks[i].Codec == "ndjson" || cfg.Log.Sinks[i].Codec == "loki" {
+				if cfg.Log.Sinks[i].Batch == nil {
+					cfg.Log.Sinks[i].Batch = &LogBatchConfig{}
+				}
+				if cfg.Log.Sinks[i].Batch.MaxItems <= 0 {
+					cfg.Log.Sinks[i].Batch.MaxItems = 20
+				}
+				if cfg.Log.Sinks[i].Batch.MaxWait <= 0 {
+					cfg.Log.Sinks[i].Batch.MaxWait = 1 * time.Second
+				}
 			}
 		}
 	}
