@@ -61,6 +61,8 @@ Supported values: `debug`, `info`, `warn`, `error`.
 
 If not specified, defaults to `info`.
 
+---
+
 ### Log sinks
 
 Sinks define additional destinations for logs.
@@ -72,6 +74,23 @@ Each sink has the following common fields:
 - `name` - human-readable sink identifier (used for diagnostics and internal logging)
 - `type` - sink type (`udp` or `http`)
 - `level` - minimum log level for this sink (inherits from `log.level` if not specified)
+- `queue_size` - maximum number of buffered log events (optional)
+
+If `queue_size` is not specified:
+
+- defaults to `50`.
+
+Queue size must be greater than or equal to `1`.
+
+When the queue is full:
+
+- the oldest log entries are dropped,
+- the agent continues operating,
+- no backpressure is applied to the main execution loop.
+
+This guarantees deterministic memory usage and prevents blocking the main execution flow.
+
+---
 
 #### UDP sink
 
@@ -82,9 +101,12 @@ Properties:
 - `name` - descriptive identifier of the sink
 - `addr` - destination in `host:port` format
 - `level` - minimum level for this sink (optional, inherits from global level)
+- `queue_size` - maximum number of buffered log events (optional)
 
 UDP logs are sent as plain text messages.<br>
 No authentication or TLS is supported for UDP.
+
+---
 
 #### HTTP sink
 
@@ -99,6 +121,8 @@ Properties:
 - `headers` - optional HTTP headers
 - `level` - minimum level for this sink (optional, inherits from global level)
 - `codec` - payload format
+- `queue_size` - maximum number of buffered log events (optional)
+- `batch` - batching configuration (optional, used only for supported codecs)
 
 Supported HTTP codecs:
 
@@ -106,6 +130,31 @@ Supported HTTP codecs:
 - `text` – plain text log line
 - `ndjson` – newline-delimited JSON (multiple events per request)
 - `loki` – Grafana Loki push API format
+
+Batching applies only to:
+
+- `ndjson`
+- `loki`
+
+Batch fields:
+
+- `max_items` - maximum number of log events per request (default: `20`)
+- `max_wait` - maximum time before flushing a partially filled batch (default: `1s`)
+
+A batch is flushed when:
+
+- `max_items` is reached, or
+- `max_wait` expires.
+
+Batching ensures bounded latency and predictable memory usage.
+
+`timeout` uses Go duration format (e.g. `500ms`, `1s`, `2s`).
+
+If the timeout is exceeded:
+
+- the HTTP request is aborted,
+- the current batch is dropped,
+- the agent continues running.
 
 ## MQTT section
 
