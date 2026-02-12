@@ -25,7 +25,7 @@ import (
 )
 
 func main() {
-	logger.SetupLogger("warn")
+	logger.SetupBootstrap("warn")
 
 	appCtx, stop := signal.NotifyContext(context.Background(), os.Interrupt, syscall.SIGTERM)
 	defer stop()
@@ -71,7 +71,7 @@ func main() {
 		os.Exit(1)
 	}
 
-	logger.SetupLogger(cfg.Log.Level)
+	logger.SetupLogger(cfg.Log)
 
 	err = sensors.Prepare(&cfg)
 	if err != nil {
