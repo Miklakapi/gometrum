@@ -71,7 +71,7 @@ func main() {
 		os.Exit(1)
 	}
 
-	logger.SetupLogger(cfg.Log)
+	logger.Setup(cfg.Log.Level)
 
 	err = sensors.Prepare(&cfg)
 	if err != nil {
