@@ -6,7 +6,7 @@ import (
 )
 
 func SetupBootstrap(level string) {
-	lvl, ok := parseLevel(level)
+	lvl, ok := ParseLevel(level)
 
 	handler := slog.NewTextHandler(os.Stdout, &slog.HandlerOptions{
 		Level: lvl,
@@ -20,7 +20,7 @@ func SetupBootstrap(level string) {
 }
 
 func Setup(level string, extraHandlers ...slog.Handler) {
-	lvl, ok := parseLevel(level)
+	lvl, ok := ParseLevel(level)
 
 	consoleHandler := slog.NewTextHandler(os.Stdout, &slog.HandlerOptions{
 		Level: lvl,
@@ -41,7 +41,7 @@ func Setup(level string, extraHandlers ...slog.Handler) {
 		slog.Warn("Unknown log level, falling back to info", "provided", level)
 	}
 }
-func parseLevel(level string) (slog.Level, bool) {
+func ParseLevel(level string) (slog.Level, bool) {
 	switch level {
 	case "debug":
 		return slog.LevelDebug, true

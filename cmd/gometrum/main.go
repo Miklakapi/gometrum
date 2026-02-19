@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"fmt"
+	"io"
 	"log/slog"
 	"net"
 	"os"
@@ -16,6 +17,7 @@ import (
 	"github.com/Miklakapi/gometrum/internal/cli"
 	"github.com/Miklakapi/gometrum/internal/config"
 	"github.com/Miklakapi/gometrum/internal/logger"
+	"github.com/Miklakapi/gometrum/internal/logsinks"
 	"github.com/Miklakapi/gometrum/internal/mqtt"
 	"github.com/Miklakapi/gometrum/internal/sensors"
 	"github.com/Miklakapi/gometrum/internal/service"
@@ -71,7 +73,34 @@ func main() {
 		os.Exit(1)
 	}
 
-	logger.Setup(cfg.Log.Level)
+	extraHandlers := make([]slog.Handler, 0)
+	sinks := make([]io.Closer, 0)
+	for _, sink := range cfg.Log.Sinks {
+		level, _ := logger.ParseLevel(sink.Level)
+
+		switch sink.Type {
+		case "udp":
+			us := logsinks.NewUdpSink(sink.Name, sink.Addr, sink.QueueSize)
+			us.Start()
+
+			sinks = append(sinks, us)
+
+			handler := logsinks.NewSinkAdapter(level, func(ev logsinks.LogEvent) bool {
+				return us.Push(ev)
+			})
+
+			extraHandlers = append(extraHandlers, handler)
+
+		default:
+			slog.Warn("unknown log sink type", "type", sink.Type, "name", sink.Name)
+		}
+	}
+	defer func() {
+		for _, s := range sinks {
+			_ = s.Close()
+		}
+	}()
+	logger.Setup(cfg.Log.Level, extraHandlers...)
 
 	err = sensors.Prepare(&cfg)
 	if err != nil {

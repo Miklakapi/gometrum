@@ -30,8 +30,9 @@ func (s *UdpSink) Start() {
 	go s.loop()
 }
 
-func (s *UdpSink) Close() {
+func (s *UdpSink) Close() error {
 	s.queue.Close()
+	return nil
 }
 
 func (s *UdpSink) loop() {
