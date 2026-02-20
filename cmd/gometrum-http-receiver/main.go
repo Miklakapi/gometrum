@@ -11,7 +11,7 @@ import (
 )
 
 func main() {
-	addr := "0.0.0.0:8088"
+	addr := "0.0.0.0:8111"
 
 	http.HandleFunc("/ingest", func(w http.ResponseWriter, r *http.Request) {
 		body, _ := io.ReadAll(r.Body)
