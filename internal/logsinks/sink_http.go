@@ -9,7 +9,9 @@ import (
 )
 
 type HttpSink struct {
-	name    string
+	name     string
+	deviceID string
+
 	url     string
 	method  string
 	timeout time.Duration
@@ -27,6 +29,7 @@ type HttpBatch struct {
 
 func NewHttpSink(
 	name string,
+	deviceID string,
 	url string,
 	method string,
 	timeout time.Duration,
@@ -49,14 +52,15 @@ func NewHttpSink(
 	}
 
 	return &HttpSink{
-		name:    name,
-		url:     url,
-		method:  method,
-		timeout: timeout,
-		headers: headers,
-		codec:   codec,
-		queue:   NewQueue[LogEvent](queueSize),
-		batch:   batch,
+		name:     name,
+		deviceID: deviceID,
+		url:      url,
+		method:   method,
+		timeout:  timeout,
+		headers:  headers,
+		codec:    codec,
+		queue:    NewQueue[LogEvent](queueSize),
+		batch:    batch,
 	}
 }
 
@@ -154,7 +158,7 @@ func (s *HttpSink) flush(client *http.Client, batch []LogEvent) error {
 		contentType = "application/x-ndjson"
 
 	case CodecLoki:
-		labels := defaultLokiLabels(s.name)
+		labels := defaultLokiLabels(s.deviceID)
 		body, err = encodeLoki(batch, labels)
 		if err != nil {
 			return err

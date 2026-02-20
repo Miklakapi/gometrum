@@ -98,6 +98,7 @@ func main() {
 
 			hs := logsinks.NewHttpSink(
 				sink.Name,
+				cfg.Agent.DeviceID,
 				sink.URL,
 				sink.Method,
 				sink.Timeout,

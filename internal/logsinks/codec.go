@@ -31,11 +31,13 @@ func encodeLoki(batch []LogEvent, labels map[string]string) ([]byte, error) {
 	return json.Marshal(p)
 }
 
-func defaultLokiLabels(sinkName string) map[string]string {
-	return map[string]string{
-		"job":  "gometrum",
-		"sink": sinkName,
+func defaultLokiLabels(deviceID string) map[string]string {
+	labels := map[string]string{
+		"job":       "gometrum",
+		"device_id": deviceID,
 	}
+
+	return labels
 }
 
 func encodeEventJSON(ev LogEvent) ([]byte, error) {
@@ -59,10 +61,14 @@ func encodeTextLine(ev LogEvent) string {
 	var b strings.Builder
 
 	ts := ev.Time.Format(time.RFC3339Nano)
+
+	b.WriteString("ts=")
 	b.WriteString(ts)
-	b.WriteString(" ")
+
+	b.WriteString(" level=")
 	b.WriteString(ev.Level)
-	b.WriteString(" ")
+
+	b.WriteString(" msg=")
 	b.WriteString(ev.Msg)
 
 	if len(ev.Attrs) > 0 {
