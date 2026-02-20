@@ -3,7 +3,7 @@
 ![license](https://img.shields.io/badge/license-MIT-blue)
 ![linux](https://img.shields.io/badge/os-Linux-green)
 ![language](https://img.shields.io/badge/language-Go_1.25.1-blue)
-![version](https://img.shields.io/badge/version-1.2.0-success)
+![version](https://img.shields.io/badge/version-1.3.0-success)
 ![status](https://img.shields.io/badge/status-development-blue)
 
 A lightweight system metrics agent written in Go.
@@ -62,6 +62,7 @@ As a result:
 - Home Assistant MQTT Discovery integration
 - Availability reporting (`online` / `offline`)
 - Discovery cleanup (`--purge` mode)
+- Structured logging sinks (UDP and HTTP with multiple codecs and batching)
 - Low runtime overhead
 
 ## Technologies
@@ -82,6 +83,5 @@ The project is in active development.
 
 Planned improvements and upcoming features:
 
-- Structured logging sinks (UDP and HTTP with multiple codecs)
 - Home Assistant button entities (in addition to sensors)
 - Additional sensor types and hardware integrations
