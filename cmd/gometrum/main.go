@@ -90,6 +90,31 @@ func main() {
 			})
 
 			extraHandlers = append(extraHandlers, handler)
+		case "http":
+			var batch logsinks.HttpBatch
+			if sink.Batch != nil {
+				batch = logsinks.HttpBatch(*sink.Batch)
+			}
+
+			hs := logsinks.NewHttpSink(
+				sink.Name,
+				sink.URL,
+				sink.Method,
+				sink.Timeout,
+				sink.Headers,
+				logsinks.HttpCodec(sink.Codec),
+				sink.QueueSize,
+				batch,
+			)
+			hs.Start()
+
+			sinks = append(sinks, hs)
+
+			handler := logsinks.NewSinkAdapter(level, func(ev logsinks.LogEvent) bool {
+				return hs.Push(ev)
+			})
+
+			extraHandlers = append(extraHandlers, handler)
 
 		default:
 			slog.Warn("unknown log sink type", "type", sink.Type, "name", sink.Name)
