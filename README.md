@@ -3,7 +3,6 @@
 ![license](https://img.shields.io/badge/license-MIT-blue)
 ![linux](https://img.shields.io/badge/os-Linux-green)
 ![language](https://img.shields.io/badge/language-Go_1.25.1-blue)
-![version](https://img.shields.io/badge/version-1.3.1-success)
 ![version](https://img.shields.io/github/v/tag/Miklakapi/gometrum)
 ![status](https://img.shields.io/badge/status-development-blue)
 
