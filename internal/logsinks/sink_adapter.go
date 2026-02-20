@@ -6,13 +6,6 @@ import (
 	"time"
 )
 
-type LogEvent struct {
-	Time  time.Time      `json:"time"`
-	Level string         `json:"level"`
-	Msg   string         `json:"msg"`
-	Attrs map[string]any `json:"attrs,omitempty"`
-}
-
 type SinkAdapter struct {
 	minLevel slog.Level
 	push     func(LogEvent) bool

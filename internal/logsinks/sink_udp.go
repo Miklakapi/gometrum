@@ -1,10 +1,7 @@
 package logsinks
 
 import (
-	"fmt"
 	"net"
-	"sort"
-	"strings"
 	"time"
 )
 
@@ -71,32 +68,4 @@ func (s *UdpSink) loop() {
 			continue
 		}
 	}
-}
-
-func encodeTextLine(ev LogEvent) string {
-	var b strings.Builder
-
-	ts := ev.Time.Format(time.RFC3339Nano)
-	b.WriteString(ts)
-	b.WriteString(" ")
-	b.WriteString(ev.Level)
-	b.WriteString(" ")
-	b.WriteString(ev.Msg)
-
-	if len(ev.Attrs) > 0 {
-		keys := make([]string, 0, len(ev.Attrs))
-		for k := range ev.Attrs {
-			keys = append(keys, k)
-		}
-		sort.Strings(keys)
-
-		for _, k := range keys {
-			b.WriteString(" ")
-			b.WriteString(k)
-			b.WriteString("=")
-			fmt.Fprint(&b, ev.Attrs[k])
-		}
-	}
-
-	return b.String()
 }
