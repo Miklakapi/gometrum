@@ -7,6 +7,7 @@ import (
 	"sync"
 	"time"
 
+	"github.com/Miklakapi/gometrum/internal/buttons"
 	"github.com/Miklakapi/gometrum/internal/mqtt"
 	"github.com/Miklakapi/gometrum/internal/sensors"
 )
@@ -15,6 +16,7 @@ type agent struct {
 	pub mqtt.Publisher
 
 	groupedSensors map[time.Duration][]sensors.Sensor
+	btns           []buttons.Button
 
 	stateBase         string
 	discoveryBase     string
@@ -40,7 +42,7 @@ type Settings struct {
 	Once bool
 }
 
-func New(s Settings, sens []sensors.Sensor, pub mqtt.Publisher) (*agent, error) {
+func New(s Settings, sens []sensors.Sensor, btns []buttons.Button, pub mqtt.Publisher) (*agent, error) {
 	stateBase := s.StatePrefix + "/" + s.DeviceId
 	availabilityTopic := stateBase + "/availability"
 
@@ -50,6 +52,7 @@ func New(s Settings, sens []sensors.Sensor, pub mqtt.Publisher) (*agent, error) 
 		pub: pub,
 
 		groupedSensors: groupByInterval(sens),
+		btns:           btns,
 
 		stateBase:         stateBase,
 		discoveryBase:     s.DiscoveryPrefix,

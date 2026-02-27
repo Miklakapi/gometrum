@@ -14,6 +14,7 @@ import (
 	"time"
 
 	"github.com/Miklakapi/gometrum/internal/agent"
+	"github.com/Miklakapi/gometrum/internal/buttons"
 	"github.com/Miklakapi/gometrum/internal/cli"
 	"github.com/Miklakapi/gometrum/internal/config"
 	"github.com/Miklakapi/gometrum/internal/logger"
@@ -140,6 +141,12 @@ func main() {
 		os.Exit(1)
 	}
 
+	btns, err := buttons.Build(cfg)
+	if err != nil {
+		slog.Error("failed to create sensors from configuration", "err", err)
+		os.Exit(1)
+	}
+
 	s := agent.Settings{
 		DiscoveryPrefix: cfg.MQTT.DiscoveryPrefix,
 		StatePrefix:     cfg.MQTT.StatePrefix,
@@ -178,7 +185,7 @@ func main() {
 		pub = mqtt.New(o)
 	}
 
-	a, err := agent.New(s, sens, pub)
+	a, err := agent.New(s, sens, btns, pub)
 	if err != nil {
 		slog.Error("failed to initialize agent", "err", err)
 		os.Exit(1)

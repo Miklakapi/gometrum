@@ -66,6 +66,20 @@ func (m *MQTTClient) Publish(topic string, qos byte, retain bool, payload []byte
 	return token.Error()
 }
 
+func (m *MQTTClient) Subscribe(topic string, qos byte, handler func(topic string, payload []byte)) error {
+	token := m.client.Subscribe(topic, qos, func(c MQTT.Client, msg MQTT.Message) {
+		if handler != nil {
+			handler(msg.Topic(), msg.Payload())
+		}
+	})
+
+	if !token.WaitTimeout(5 * time.Second) {
+		return fmt.Errorf("mqtt subscribe timeout (topic=%s)", topic)
+	}
+
+	return token.Error()
+}
+
 func (m *MQTTClient) Close() {
 	m.client.Disconnect(250)
 }

@@ -43,6 +43,11 @@ func (d *DryRunClient) Publish(topic string, qos byte, retain bool, payload []by
 	return nil
 }
 
+func (d *DryRunClient) Subscribe(topic string, qos byte, handler func(topic string, payload []byte)) error {
+	fmt.Printf("SUBSCRIBE %s\n", topic)
+	return nil
+}
+
 func (d *DryRunClient) Close() {
 	fmt.Println("DRY-RUN: close skipped")
 
