@@ -84,4 +84,3 @@ The project is in active development.
 Planned improvements and upcoming features:
 
 - Home Assistant button entities (in addition to sensors)
-- Additional sensor types and hardware integrations

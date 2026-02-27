@@ -158,7 +158,7 @@ var registry = map[string]SensorDefinition{
 	// GPU
 	"gpu_usage": {
 		DefaultName:        "GPU usage",
-		DefaultIcon:        "mdi:gpu",
+		DefaultIcon:        "mdi:expansion-card",
 		DefaultUnit:        "%",
 		DefaultDeviceClass: "",
 		DefaultStateClass:  "measurement",
