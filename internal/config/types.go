@@ -7,6 +7,7 @@ type Config struct {
 	MQTT    MQTTConfig              `yaml:"mqtt"`
 	Agent   AgentConfig             `yaml:"agent"`
 	Sensors map[string]SensorConfig `yaml:"sensors"`
+	Buttons map[string]ButtonConfig `yaml:"buttons"`
 }
 
 type LogConfig struct {
@@ -68,4 +69,15 @@ type HASensorConfig struct {
 	Unit        string `yaml:"unit,omitempty"`
 	DeviceClass string `yaml:"device_class,omitempty"`
 	StateClass  string `yaml:"state_class,omitempty"`
+}
+
+type ButtonConfig struct {
+	Name    string          `yaml:"name"`
+	Command []string        `yaml:"command"`
+	Timeout time.Duration   `yaml:"timeout"`
+	HA      *HAButtonConfig `yaml:"ha,omitempty"`
+}
+
+type HAButtonConfig struct {
+	Icon string `yaml:"icon,omitempty"`
 }

@@ -180,6 +180,38 @@ func validateSensors(sc map[string]SensorConfig) error {
 	return nil
 }
 
+func validateButtons(bc map[string]ButtonConfig) error {
+	if len(bc) == 0 {
+		return nil
+	}
+
+	for buttonKey, buttonCfg := range bc {
+		if buttonKey == "" {
+			return errors.New("config: buttons contains an empty key")
+		}
+
+		if buttonCfg.Name == "" {
+			return errors.New("config: buttons." + buttonKey + ".name is required")
+		}
+
+		if len(buttonCfg.Command) == 0 {
+			return errors.New("config: buttons." + buttonKey + ".command must contain at least one item (executable name)")
+		}
+
+		for i, arg := range buttonCfg.Command {
+			if arg == "" {
+				return fmt.Errorf("config: buttons.%s.command[%d] cannot be empty", buttonKey, i)
+			}
+		}
+
+		if buttonCfg.Timeout <= 0 {
+			return errors.New("config: buttons." + buttonKey + ".timeout must be > 0 (e.g. \"10s\")")
+		}
+	}
+
+	return nil
+}
+
 func isValidLogLevel(level string) bool {
 	switch level {
 	case "debug", "info", "warn", "error":

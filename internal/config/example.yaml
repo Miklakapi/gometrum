@@ -173,3 +173,15 @@ sensors:
   # GPU power consumption
   gpu_power:
     interval: "30s"
+
+buttons:
+  reboot:
+    name: "Reboot"
+
+    # Executes a system reboot.
+    # Requires appropriate privileges (e.g. passwordless sudo or running the agent as root).
+    command: ["sudo", "reboot"]
+    timeout: "10s"
+    ha:
+      # Optional Home Assistant overrides
+      icon: "mdi:restart"

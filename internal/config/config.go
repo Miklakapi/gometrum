@@ -72,6 +72,10 @@ func ValidateConfig(cfg Config) error {
 		return err
 	}
 
+	if err = validateButtons(cfg.Buttons); err != nil {
+		return err
+	}
+
 	return nil
 }
 
@@ -145,8 +149,28 @@ func normalizeConfig(cfg *Config) {
 
 		normalizedSensors[sensorKey] = sensor
 	}
-
 	cfg.Sensors = normalizedSensors
+
+	normalizedButtons := make(map[string]ButtonConfig, len(cfg.Buttons))
+	for key, button := range cfg.Buttons {
+		buttonKey := strings.TrimSpace(key)
+		if buttonKey == "" {
+			continue
+		}
+
+		button.Name = strings.TrimSpace(button.Name)
+
+		for i, arg := range button.Command {
+			button.Command[i] = strings.TrimSpace(arg)
+		}
+
+		if button.HA != nil {
+			button.HA.Icon = strings.TrimSpace(button.HA.Icon)
+		}
+
+		normalizedButtons[buttonKey] = button
+	}
+	cfg.Buttons = normalizedButtons
 }
 
 func applyDefaults(cfg *Config) {
@@ -201,7 +225,7 @@ func applyDefaults(cfg *Config) {
 		cfg.MQTT.StatePrefix = "gometrum"
 	}
 	if cfg.MQTT.DefaultInterval <= 0 {
-		cfg.MQTT.DefaultInterval = time.Duration(1 * time.Minute)
+		cfg.MQTT.DefaultInterval = 1 * time.Minute
 	}
 
 	if cfg.Agent.DeviceName == "" {
@@ -219,5 +243,20 @@ func applyDefaults(cfg *Config) {
 			sensorCfg.Interval = cfg.MQTT.DefaultInterval
 			cfg.Sensors[key] = sensorCfg
 		}
+	}
+
+	for key, buttonCfg := range cfg.Buttons {
+		if buttonCfg.Timeout <= 0 {
+			buttonCfg.Timeout = 10 * time.Second
+		}
+
+		if buttonCfg.HA == nil {
+			buttonCfg.HA = &HAButtonConfig{}
+		}
+		if buttonCfg.HA.Icon == "" {
+			buttonCfg.HA.Icon = "mdi:gesture-tap-button"
+		}
+
+		cfg.Buttons[key] = buttonCfg
 	}
 }
