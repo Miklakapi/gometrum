@@ -48,6 +48,7 @@ At a high level, the configuration file consists of four sections:
 - `mqtt` - MQTT connection and discovery settings
 - `agent` - device metadata used by Home Assistant
 - `sensors` - sensor definitions and collection intervals
+- `buttons` - button entities executing host commands
 
 ## Log section
 
@@ -250,6 +251,70 @@ Configuration validation ensures:
 - sensor-specific constraints are respected.
 
 Hardware availability is not validated at configuration time.
+
+## Buttons section
+
+The `buttons` section defines **Home Assistant button entities** that execute system commands on the host.
+
+Each button:
+
+- exists only if present in the configuration,
+- is identified by its key (e.g. reboot, shutdown),
+- executes a configured command when pressed in Home Assistant.
+
+Buttons are enabled strictly by presence.\
+There are no global enable/disable switches.
+
+- Commenting out a button disables it.
+- Removing a button removes the corresponding Home Assistant entity.
+- Startup behavior is deterministic.
+
+### Button fields
+
+`name`
+
+A button must define a human-readable `name`.\
+This is the label shown in Home Assistant.
+
+`command`
+
+A button must define a `command` as an array of strings.
+
+The first item is the executable name, remaining items are passed as arguments.
+
+Example:
+
+```yaml
+command: ['sudo', 'reboot']
+```
+
+Commands are executed directly (without an implicit shell).\
+If you need shell features (pipes, redirects, `&&`), invoke a shell explicitly:
+
+```yaml
+command: ['bash', '-lc', 'your command here']
+```
+
+`timeout`
+
+Maximum allowed execution time for the command. Uses Go duration format (e.g. 500ms, 2s, 10s).\
+If not specified, a sensible default is applied.
+
+`ha` **(Home Assistant overrides)**
+
+The optional `ha` block allows overriding Home Assistant button metadata.
+
+Supported override fields include:
+
+- `icon`
+
+If not specified, sensible defaults are applied.
+
+### Privileges
+
+Commands run with the same privileges as the GoMetrum process.
+
+If a command requires elevated permissions (e.g. sudo reboot), the host must be configured accordingly (for example, passwordless sudo for that command, or running the agent as root).
 
 ## Validate configuration
 

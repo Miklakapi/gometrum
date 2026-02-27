@@ -8,7 +8,7 @@
 
 A lightweight system metrics agent written in Go.
 
-**GoMetrum collects host-level metrics and publishes them to Home Assistant using MQTT Discovery.**
+**GoMetrum collects host-level metrics and exposes optional host actions to Home Assistant using MQTT Discovery.**
 
 The project focuses on **explicit configuration**, **deterministic behavior**, and **low runtime overhead**, while avoiding implicit defaults and hidden logic.
 
@@ -32,14 +32,14 @@ GoMetrum is a background agent designed to run on Linux hosts and report system-
 Key characteristics:
 
 - single explicit YAML configuration file,
-- sensors enabled **only by presence**,
+- sensors and buttons enabled **only by presence**,
 - predictable Home Assistant entity set,
 - clean startup and shutdown behavior.
 - publishes states via MQTT,
 
 ## Explicit configuration model
 
-Each sensor exists **only if it is explicitly defined** in the configuration file.
+Each entity (sensor or button) exists **only if it is explicitly defined** in the configuration file.
 
 There are:
 
@@ -60,6 +60,7 @@ As a result:
 - Per-sensor refresh intervals
 - MQTT retained state publishing
 - Home Assistant MQTT Discovery integration
+- Home Assistant button entities for executing host commands
 - Availability reporting (`online` / `offline`)
 - Discovery cleanup (`--purge` mode)
 - Structured logging sinks (UDP and HTTP with multiple codecs and batching)
@@ -78,9 +79,3 @@ Project is created with:
 ## Status
 
 The project is in active development.
-
-## Roadmap
-
-Planned improvements and upcoming features:
-
-- Home Assistant button entities (in addition to sensors)
