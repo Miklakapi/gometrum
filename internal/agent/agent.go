@@ -92,6 +92,10 @@ func (a *agent) Run(ctx context.Context) error {
 		return nil
 	}
 
+	if err := a.registerButtonHandlers(ctx); err != nil {
+		return err
+	}
+
 	var wg sync.WaitGroup
 
 	for interval, group := range a.groupedSensors {
@@ -132,6 +136,13 @@ func (a *agent) Purge() error {
 		}
 	}
 
+	for _, b := range a.btns {
+		topic := fmt.Sprintf("%s/button/%s/%s/config", a.discoveryBase, a.deviceId, b.Key())
+		if err := a.pub.Publish(topic, 1, true, []byte{}); err != nil {
+			return fmt.Errorf("purge: clear button discovery failed (topic=%s): %w", topic, err)
+		}
+	}
+
 	for _, group := range a.groupedSensors {
 		for _, s := range group {
 			topic := fmt.Sprintf("%s/%s/state", a.stateBase, s.Key())
@@ -148,6 +159,40 @@ func (a *agent) Purge() error {
 	}
 
 	return nil
+}
+
+func (a *agent) registerButtonHandlers(ctx context.Context) error {
+	for _, btn := range a.btns {
+		topic := fmt.Sprintf("%s/button/%s/press", a.stateBase, btn.Key())
+
+		if err := a.pub.Subscribe(topic, 1, func(t string, payload []byte) {
+			a.handleButtonPress(ctx, btn, t, payload)
+		}); err != nil {
+			return fmt.Errorf("buttons: subscribe failed (button=%s, topic=%s): %w", btn.Key(), topic, err)
+		}
+
+		slog.Info("button subscribed", "button", btn.Key(), "topic", topic)
+	}
+
+	return nil
+}
+
+func (a *agent) handleButtonPress(ctx context.Context, b buttons.Button, topic string, payload []byte) {
+	out, err := b.Execute(ctx)
+
+	attrs := []any{
+		"button", b.Key(),
+		"topic", topic,
+		"payload", string(payload),
+		"cmd", b.Command(),
+	}
+
+	if err != nil {
+		slog.Error("button command failed", append(attrs, "err", err, "output", string(out))...)
+		return
+	}
+
+	slog.Info("button command executed", append(attrs, "output", string(out))...)
 }
 
 func groupByInterval(list []sensors.Sensor) map[time.Duration][]sensors.Sensor {

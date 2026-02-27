@@ -4,7 +4,6 @@
 ![linux](https://img.shields.io/badge/os-Linux-green)
 ![language](https://img.shields.io/badge/language-Go_1.25.1-blue)
 ![version](https://img.shields.io/github/v/tag/Miklakapi/gometrum)
-![status](https://img.shields.io/badge/status-development-blue)
 
 A lightweight system metrics agent written in Go.
 
@@ -75,7 +74,3 @@ Project is created with:
 - Home Assistant MQTT Discovery
 - gopsutil
 - systemd (optional)
-
-## Status
-
-The project is in active development.

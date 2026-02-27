@@ -21,6 +21,16 @@ type haSensorDiscovery struct {
 	Device            *haDevice `json:"device,omitempty"`
 }
 
+type haButtonDiscovery struct {
+	Name              string    `json:"name"`
+	UniqueID          string    `json:"unique_id"`
+	CommandTopic      string    `json:"command_topic"`
+	AvailabilityTopic string    `json:"availability_topic,omitempty"`
+	Icon              string    `json:"icon,omitempty"`
+	PayloadPress      string    `json:"payload_press,omitempty"`
+	Device            *haDevice `json:"device,omitempty"`
+}
+
 type haDevice struct {
 	Identifiers  []string `json:"identifiers"`
 	Name         string   `json:"name"`
@@ -74,6 +84,35 @@ func (a *agent) publishDiscovery() error {
 			if err := a.pub.Publish(configTopic, 1, true, b); err != nil {
 				return fmt.Errorf("discovery publish failed (sensor=%s, topic=%s): %w", key, configTopic, err)
 			}
+		}
+	}
+
+	for _, btn := range a.btns {
+		key := btn.Key()
+
+		configTopic := fmt.Sprintf("%s/button/%s/%s/config", a.discoveryBase, a.deviceId, key)
+		commandTopic := fmt.Sprintf("%s/button/%s/press", a.stateBase, key)
+
+		payload := haButtonDiscovery{
+			Name:              btn.Name(),
+			UniqueID:          fmt.Sprintf("%s_%s", a.deviceId, key),
+			CommandTopic:      commandTopic,
+			AvailabilityTopic: a.availabilityTopic,
+			Device:            dev,
+			PayloadPress:      "PRESS",
+		}
+
+		if icon := btn.Icon(); icon != "" {
+			payload.Icon = icon
+		}
+
+		b, err := json.Marshal(payload)
+		if err != nil {
+			return fmt.Errorf("discovery marshal failed (button=%s): %w", key, err)
+		}
+
+		if err := a.pub.Publish(configTopic, 1, true, b); err != nil {
+			return fmt.Errorf("discovery publish failed (button=%s, topic=%s): %w", key, configTopic, err)
 		}
 	}
 
