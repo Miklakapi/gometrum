@@ -17,9 +17,15 @@ The project focuses on **explicit configuration**, **deterministic behavior**, a
 
 ## Installation
 
-Install the prebuilt package with APT; Go is not required on the target device.
-See [installation and updates](docs/installation.md) for repository setup,
-standalone binaries and migration from a manual installation.
+Debian, Ubuntu and Raspberry Pi OS 64-bit:
+
+```bash
+curl -fsSL https://miklakapi.github.io/gometrum/install.sh | sudo bash
+```
+
+This adds the signed APT repository and installs the package. Go is not required.
+See [installation and updates](docs/installation.md) for first-time configuration,
+manual setup and migration from a manual installation.
 
 [Download releases](https://github.com/Miklakapi/gometrum/releases/latest)
 

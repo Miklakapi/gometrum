@@ -12,6 +12,7 @@ key="$(gpg --batch --with-colons --list-secret-keys | awk -F: '$1 == "fpr" { pri
 test -n "$key"
 mkdir -p _site/pool/main/g/gometrum
 cp dist/gometrum_*.deb _site/pool/main/g/gometrum/
+install -m 0644 install.sh _site/install.sh
 gpg --batch --armor --export-options export-minimal --export "$key" > _site/gometrum.asc
 cd _site
 for arch in amd64 arm64; do

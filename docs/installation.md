@@ -5,7 +5,24 @@ GoMetrum publishes Linux AMD64 and ARM64 binaries and Debian packages in
 releases start with the first new version after release automation was added;
 earlier tags remain source-only. Go is not required on the target device.
 
-## Recommended: APT (Debian, Ubuntu and Raspberry Pi OS 64-bit)
+## Recommended: one-command APT installation
+
+Debian, Ubuntu and Raspberry Pi OS 64-bit:
+
+```bash
+curl -fsSL https://miklakapi.github.io/gometrum/install.sh | sudo bash
+```
+
+The [installer](../install.sh) adds the signing key and APT repository, installs
+GoMetrum and removes its temporary files, including on failure. It preserves
+existing configuration. Running it again installs any available update; regular
+updates also work through APT. For an existing manual installation, follow
+[migration](#migrating-a-manual-installation) first.
+
+The installer does not configure MQTT or start an unconfigured service. Continue
+with [first-time configuration](#first-time-configuration) below.
+
+## Manual APT setup
 
 Add the signed repository once:
 
@@ -22,6 +39,8 @@ sudo apt install gometrum
 The APT repository becomes available after its first successful release
 and Pages deployment. Packages target Debian 12+ and Ubuntu 22.04+ on AMD64
 or ARM64. NVIDIA sensors also require the host's NVIDIA driver/NVML library.
+
+## First-time configuration
 
 On first installation, edit the configuration:
 
