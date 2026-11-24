@@ -1,0 +1,79 @@
+name: Release
+
+on:
+  push:
+    tags: ['v*']
+
+concurrency:
+  group: release
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+jobs:
+  release:
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4.4.0
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+
+      - name: Build binaries and Debian packages
+        env:
+          RELEASE_VERSION: ${{ github.ref_name }}
+        run: |
+          docker run --rm -v "$GITHUB_WORKSPACE:/src" -w /src \
+            -e RELEASE_VERSION golang:1.26.11-bookworm bash -c '
+              git config --global --add safe.directory /src &&
+              apt-get update &&
+              apt-get install -y --no-install-recommends gcc-aarch64-linux-gnu libc6-dev-arm64-cross &&
+              bash scripts/build-release.sh "$RELEASE_VERSION"'
+          sudo chown -R "$(id -u):$(id -g)" dist
+
+      - name: Publish GitHub Release
+        env:
+          GH_TOKEN: ${{ github.token }}
+          RELEASE_VERSION: ${{ github.ref_name }}
+        run: |
+          if gh release view "$RELEASE_VERSION" >/dev/null 2>&1; then
+            if [ "$(gh release view "$RELEASE_VERSION" --json isDraft --jq .isDraft)" = true ]; then
+              gh release upload "$RELEASE_VERSION" dist/* --clobber
+              gh release edit "$RELEASE_VERSION" --draft=false --latest
+            fi
+          else
+            gh release create "$RELEASE_VERSION" dist/* --verify-tag --draft \
+              --title "$RELEASE_VERSION" --generate-notes
+            gh release edit "$RELEASE_VERSION" --draft=false --latest
+          fi
+          gh release download "$RELEASE_VERSION" --pattern '*.deb' --dir dist --clobber
+
+      - name: Build signed APT repository
+        env:
+          APT_SIGNING_KEY: ${{ secrets.APT_SIGNING_KEY }}
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends apt-utils dpkg-dev
+          bash scripts/build-apt.sh
+
+      - name: Upload APT repository
+        uses: actions/upload-pages-artifact@v4
+        with:
+          path: _site
+
+  apt:
+    needs: release
+    runs-on: ubuntu-24.04
+    permissions:
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Publish APT repository
+        id: deployment
+        uses: actions/deploy-pages@v4

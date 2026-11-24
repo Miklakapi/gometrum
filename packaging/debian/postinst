@@ -1,0 +1,13 @@
+#!/bin/sh
+set -e
+if [ "$1" = configure ]; then
+  deb-systemd-helper update-state gometrum.service
+  if [ -d /run/systemd/system ]; then
+    systemctl daemon-reload
+    if [ -f /etc/gometrum.yaml ] && /usr/bin/gometrum --config /etc/gometrum.yaml --validate; then
+      deb-systemd-invoke try-restart gometrum.service || true
+    else
+      echo 'Configure /etc/gometrum.yaml, then run: systemctl enable --now gometrum'
+    fi
+  fi
+fi

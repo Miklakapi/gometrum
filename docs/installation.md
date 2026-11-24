@@ -1,84 +1,123 @@
 # Installation
 
-This document describes how to install GoMetrum on a Linux system.
+GoMetrum publishes Linux AMD64 and ARM64 binaries and Debian packages in
+[GitHub Releases](https://github.com/Miklakapi/gometrum/releases). Binary
+releases start with the first new version after release automation was added;
+earlier tags remain source-only. Go is not required on the target device.
 
-## Requirements
+## Recommended: APT (Debian, Ubuntu and Raspberry Pi OS 64-bit)
 
-- Linux host
-- Go ≥ 1.25
-- MQTT broker
-- Home Assistant with MQTT integration enabled
+Add the signed repository once:
 
-## Recommended: install using `go install`
+```bash
+sudo install -d -m 0755 /etc/apt/keyrings
+curl -fsSL https://miklakapi.github.io/gometrum/gometrum.asc -o /tmp/gometrum.asc
+sudo install -m 0644 /tmp/gometrum.asc /etc/apt/keyrings/gometrum.asc
+rm /tmp/gometrum.asc
+echo 'deb [arch=amd64,arm64 signed-by=/etc/apt/keyrings/gometrum.asc] https://miklakapi.github.io/gometrum stable main' | sudo tee /etc/apt/sources.list.d/gometrum.list
+sudo apt update
+sudo apt install gometrum
+```
 
-This method:
+The APT repository becomes available after its first successful release
+and Pages deployment. Packages target Debian 12+ and Ubuntu 22.04+ on AMD64
+or ARM64. NVIDIA sensors also require the host's NVIDIA driver/NVML library.
 
-- installs a single static binary,
-- does not require root,
-- is easy to update.
+On first installation, edit the configuration:
+
+```bash
+sudoedit /etc/gometrum.yaml
+sudo gometrum --config /etc/gometrum.yaml --validate
+sudo systemctl enable --now gometrum
+```
+
+Set the MQTT broker, optional credentials, a unique MQTT `client_id` and
+`agent.device_id`. The initial configuration explicitly enables CPU usage,
+memory usage and uptime. See [configuration](configuration.md) for other
+sensors, NVIDIA GPU metrics and buttons. The service runs as root, matching
+host metrics and command execution; enable only buttons you intend to expose.
+It is not enabled or started automatically on first installation.
+
+### Updates
+
+```bash
+sudo apt update
+sudo apt upgrade
+```
+
+APT installs newer published versions and the package restarts an already
+running service when the configuration validates. Your `/etc/gometrum.yaml`
+is a Debian configuration file and is preserved during updates. Installing a
+package does not configure background automatic updates; that is a separate
+system policy.
+
+## Install a downloaded .deb
+
+Download the `.deb` matching `dpkg --print-architecture` from a specific
+[release](https://github.com/Miklakapi/gometrum/releases), then run, for example:
+
+```bash
+sudo apt install ./gometrum_1.5.0_arm64.deb
+```
+
+Use the actual version and architecture from the release. Without adding the
+APT repository, future updates require downloading and installing a new `.deb`.
+
+## Standalone binary
+
+For manual installation, choose AMD64 (`x86_64`) or ARM64 (`aarch64`):
+
+```bash
+curl -fLO https://github.com/Miklakapi/gometrum/releases/latest/download/gometrum-linux-amd64
+curl -fLO https://github.com/Miklakapi/gometrum/releases/latest/download/SHA256SUMS
+sha256sum --check --ignore-missing SHA256SUMS
+```
+
+Continue only after the downloaded binary reports `OK`:
+
+```bash
+sudo install -m 0755 gometrum-linux-amd64 /usr/local/bin/gometrum
+rm gometrum-linux-amd64 SHA256SUMS
+```
+
+Use `gometrum-linux-arm64` instead on Raspberry Pi OS 64-bit. Specific versions
+use `/releases/download/vX.Y.Z/` instead of `/releases/latest/download/`.
+Standalone binaries use the system C library; they are not fully static.
+See [running](running.md) for manual configuration and systemd setup.
+For a running manual installation, stop the service before replacing its
+binary and start it afterwards. Manual downloads do not register an APT package.
+
+## Migrating a manual installation
+
+The package uses `/usr/bin/gometrum` and provides its systemd unit under
+`/usr/lib/systemd/system`. An older file under `/usr/local/bin` or a unit in
+`/etc/systemd/system` could override these, so package installation refuses
+this situation rather than changing your files automatically.
+
+For the standard manual installation described in previous documentation:
+
+```bash
+sudo systemctl stop gometrum
+sudo systemctl disable gometrum
+sudo mv /etc/systemd/system/gometrum.service /etc/systemd/system/gometrum.service.manual-backup
+sudo mv /usr/local/bin/gometrum /usr/local/bin/gometrum.manual-backup
+sudo systemctl daemon-reload
+sudo apt install gometrum
+```
+
+Keep the existing `/etc/gometrum.yaml` if dpkg asks about a configuration file.
+Validate it and enable the service using the first-install commands above.
+Only after checking the service and Home Assistant metrics, delete the two
+`.manual-backup` files. If your service or executable uses different paths,
+adapt this migration to the existing unit's `ExecStart`.
+
+## Building from source
+
+Developers may still build with Go and a C compiler (CGO is required):
 
 ```bash
 go install github.com/Miklakapi/gometrum/cmd/gometrum@latest
 ```
 
-Make sure your Go binary directory is in `$PATH`:
-
-```bash
-export PATH="$PATH:$(go env GOPATH)/bin"
-```
-
-> Note: this command affects only the current shell session.
-> To make the change permanent, add it to your shell configuration file
-> (e.g. ~/.bashrc, ~/.zshrc).
-
-Verify installation:
-
-```bash
-gometrum --help
-```
-
-## Optional: system-wide installation
-
-For production systems, you may want the binary available system-wide.
-
-```bash
-sudo cp "$(go env GOPATH)/bin/gometrum" /usr/local/bin/gometrum
-sudo chmod +x /usr/local/bin/gometrum
-```
-
-Verify:
-
-```bash
-which gometrum
-sudo gometrum --help
-```
-
-## Updating
-
-Updating GoMetrum replaces only the binary. The configuration file is not modified.
-
-### Update to the latest version
-
-Re-run `go install` with the `@latest` version tag:
-
-```bash
-go install github.com/Miklakapi/gometrum/cmd/gometrum@latest
-```
-
-This downloads, builds, and installs the newest released version into the Go binary directory ($(go env GOPATH)/bin).
-
-Verify the updated binary:
-
-```bash
-gometrum --help
-```
-
-### Install a specific version
-
-To install a specific version:
-
-```bash
-go install github.com/Miklakapi/gometrum/cmd/gometrum@v1.0.2
-```
-
-This is useful for reproducible setups or rollbacks.
+This installs to `$(go env GOPATH)/bin`, or `GOBIN` when configured. It does
+not install the Debian package, configure systemd or set up APT updates.

@@ -1,0 +1,21 @@
+log:
+  level: info
+
+mqtt:
+  host: ""           # MQTT broker hostname or IP address (required).
+  port: 1883
+  username: ""       # Optional authentication; set both username and password.
+  password: ""
+  client_id: ""      # Unique MQTT client ID for this device (required).
+  default_interval: 30s
+
+agent:
+  device_id: ""      # Unique Home Assistant device ID (required).
+  device_name: "GoMetrum"
+
+sensors:
+  cpu_usage: {}
+  memory_usage: {}
+  uptime: {}
+
+# Add further sensors and buttons explicitly; see docs/configuration.md.

@@ -1,0 +1,10 @@
+#!/bin/sh
+set -e
+if [ "$1" = install ]; then
+  for path in /usr/local/bin/gometrum /etc/systemd/system/gometrum.service; do
+    if [ -e "$path" ] || [ -L "$path" ]; then
+      echo 'Existing manual installation found. Follow docs/installation.md#migrating-a-manual-installation before installing the package.' >&2
+      exit 1
+    fi
+  done
+fi

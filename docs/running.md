@@ -30,7 +30,18 @@ On shutdown:
 
 Running GoMetrum as a systemd service is recommended for long-running or production setups.
 
-### Generate service file
+### Debian / APT installation
+
+The package already installs the service. Configure `/etc/gometrum.yaml`, then:
+
+```bash
+sudo gometrum --config /etc/gometrum.yaml --validate
+sudo systemctl enable --now gometrum
+```
+
+Do not generate or copy another unit for package installations.
+
+### Manual binary installation: generate service file
 
 Generate a systemd unit file:
 

@@ -6,3 +6,5 @@ bin
 *.logs
 .env
 test
+/dist/
+/_site/

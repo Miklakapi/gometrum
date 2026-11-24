@@ -15,6 +15,14 @@ The project focuses on **explicit configuration**, **deterministic behavior**, a
     <img src="docs/images/sensors.png">
 </p>
 
+## Installation
+
+Install the prebuilt package with APT; Go is not required on the target device.
+See [installation and updates](docs/installation.md) for repository setup,
+standalone binaries and migration from a manual installation.
+
+[Download releases](https://github.com/Miklakapi/gometrum/releases/latest)
+
 ## Documentation
 
 **Project documentation:**
