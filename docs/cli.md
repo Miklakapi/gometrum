@@ -9,6 +9,10 @@ The CLI supports:
 - configuration and service generation,
 - validation and cleanup tasks.
 
+Debian packages include Bash and Zsh Tab completion. Type `gometrum --` and press
+Tab to discover options; after `--config` or `--service-path`, Tab completes file
+paths. See [shell completion](installation.md#shell-completion) for shell setup.
+
 ## Common flags
 
 ### `--config`, `-c`

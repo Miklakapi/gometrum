@@ -1,0 +1,25 @@
+#compdef gometrum
+
+case "$PREFIX" in
+    (--once=*|--dry-run=*|--validate=*|--generate-config=*|--generate-service=*|--purge=*|--version=*|-v=*)
+        compset -P '*='
+        _values 'boolean' true false
+        return
+        ;;
+esac
+
+local -a exit_modes execution_modes
+exit_modes=(--validate --generate-config --generate-service --purge --version -v)
+execution_modes=(--once --dry-run)
+
+_arguments \
+    '(--config -c)'{--config,-c}'=[Path to YAML configuration]:configuration file:_files' \
+    "($exit_modes --once)--once[Collect and publish once, then exit]" \
+    "($exit_modes --dry-run)--dry-run[Print MQTT messages without publishing]" \
+    "($exit_modes $execution_modes)--validate[Validate configuration and exit]" \
+    "($exit_modes $execution_modes)--generate-config[Generate example configuration and exit]" \
+    '--service-path=[Path for generated systemd service]:service file:_files' \
+    "($exit_modes $execution_modes)--generate-service[Generate systemd service and exit]" \
+    "($exit_modes $execution_modes)"{--version,-v}'[Show version and exit]' \
+    "($exit_modes $execution_modes)--purge[Remove configured Home Assistant discovery entities]" \
+    '(- *)'{--help,-h}'[Show command-line help]'

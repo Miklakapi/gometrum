@@ -22,6 +22,19 @@ updates also work through APT. For an existing manual installation, follow
 The installer does not configure MQTT or start an unconfigured service. Continue
 with [first-time configuration](#first-time-configuration) below.
 
+### Shell completion
+
+The Debian package installs Tab completion for Bash and Zsh automatically.
+Open a new terminal after installation, then type `gometrum --` and press Tab.
+Options and configuration/service file paths are completed. Zsh also shows
+option descriptions and hides incompatible execution modes.
+
+Bash uses the recommended `bash-completion` package, installed by APT with its
+default settings. Zsh uses its standard completion system (`compinit`), which
+must be enabled in your shell configuration. GoMetrum does not edit shell startup
+files or require Vigil. Standalone binary installations do not install completion
+files.
+
 ## Manual APT setup
 
 Add the signed repository once:

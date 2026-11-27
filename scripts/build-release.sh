@@ -48,6 +48,10 @@ for arch in amd64 arm64; do
   mkdir -p "$root/DEBIAN" "$root/etc" "$root/usr/bin" "$root/usr/lib/systemd/system" \
     "$root/usr/share/doc/gometrum/examples"
   install -m 0755 "$binary" "$root/usr/bin/gometrum"
+  install -D -m 0644 packaging/completions/gometrum.bash \
+    "$root/usr/share/bash-completion/completions/gometrum"
+  install -D -m 0644 packaging/completions/_gometrum \
+    "$root/usr/share/zsh/vendor-completions/_gometrum"
   install -m 0600 packaging/debian/gometrum.yaml "$root/etc/gometrum.yaml"
   printf '/etc/gometrum.yaml\n' > "$root/DEBIAN/conffiles"
   sed 's|/usr/local/bin/gometrum|/usr/bin/gometrum|' internal/service/example.service \
@@ -65,6 +69,7 @@ Maintainer: Kacper Miklaszewski <Miklakapi@users.noreply.github.com>
 Section: utils
 Priority: optional
 Depends: libc6 (>= $libc_version), init-system-helpers (>= 1.54)
+Recommends: bash-completion
 Homepage: https://github.com/Miklakapi/gometrum
 Description: System metrics for Home Assistant over MQTT
  Requires an MQTT broker and an explicitly configured YAML file.

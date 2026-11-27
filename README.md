@@ -1,4 +1,6 @@
-# GoMetrum
+<p align="center">
+  <img src="docs/images/gometrum-logo.svg" alt="GoMetrum — Know your system." width="360">
+</p>
 
 ![license](https://img.shields.io/badge/license-MIT-blue)
 ![linux](https://img.shields.io/badge/os-Linux-green)
@@ -78,6 +80,7 @@ As a result:
 - Discovery cleanup (`--purge` mode)
 - Structured logging sinks (UDP and HTTP with multiple codecs and batching)
 - Low runtime overhead
+- Bash and Zsh tab completion, installed automatically by the Debian package
 
 ## Technologies
 

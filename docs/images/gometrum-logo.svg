@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 440 230" fill="none">
+  <title>GoMetrum — Know your system.</title>
+  <desc>A blue signal waveform above the GoMetrum name and tagline.</desc>
+  <g transform="translate(156 8)">
+    <path d="M10 56h22L46 16l20 72 20-52 16 20h16" stroke="#9fc5f8" stroke-width="7" stroke-linecap="round" stroke-linejoin="round"/>
+  </g>
+  <g fill="#9fc5f8" text-anchor="middle" font-family="system-ui, -apple-system, 'Segoe UI', sans-serif">
+    <text x="220" y="160" font-size="36" font-weight="600">GoMetrum</text>
+    <text x="220" y="202" font-size="23">Know your system.</text>
+  </g>
+</svg>
